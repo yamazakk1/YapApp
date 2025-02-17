@@ -1,0 +1,9 @@
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/YapApp.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/edit_cache.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/rebuild_cache.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/list_install_components.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/install.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/install/local.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/install/strip.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/YapApp_autogen_timestamp_deps.dir
+/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/YapApp_autogen.dir

@@ -1,0 +1,21 @@
+# ninja log v6
+113	457	1739796841609345473	build.ninja	c270d91e5e85c593
+6	369	1739796840885505000	/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/cmake.verify_globs	10559572acf3ed7a
+36	489	1739796574233988666	YapApp_autogen/timestamp	dc6ccfcf1271f1c
+36	489	1739796574233988666	YapApp_autogen/mocs_compilation.cpp	dc6ccfcf1271f1c
+36	489	1739796574233988666	/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/YapApp_autogen/timestamp	dc6ccfcf1271f1c
+36	489	1739796574233988666	/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/YapApp_autogen/mocs_compilation.cpp	dc6ccfcf1271f1c
+490	1458	1739796574259946857	CMakeFiles/YapApp.dir/mytcpserver.cpp.o	c5ada61d7758cf3d
+490	1502	1739796574260207606	CMakeFiles/YapApp.dir/widget.cpp.o	563219847e92ecb
+489	1541	1739796574259780274	CMakeFiles/YapApp.dir/main.cpp.o	25d1d8ac32172f7e
+489	1481	1739796574259470817	CMakeFiles/YapApp.dir/YapApp_autogen/mocs_compilation.cpp.o	b2a1552555b2c393
+1541	1661	1739796575311479554	YapApp.app/Contents/MacOS/YapApp	86f1104391833835
+370	906	1739796841609345473	build.ninja	c270d91e5e85c593
+2	258	1739796841628353901	/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/CMakeFiles/cmake.verify_globs	10559572acf3ed7a
+269	331	1739796841895313226	YapApp_autogen/timestamp	dc6ccfcf1271f1c
+269	331	1739796841895313226	YapApp_autogen/mocs_compilation.cpp	dc6ccfcf1271f1c
+269	331	1739796841895313226	/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/YapApp_autogen/timestamp	dc6ccfcf1271f1c
+269	331	1739796841895313226	/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_2_for_macOS-Release/YapApp_autogen/mocs_compilation.cpp	dc6ccfcf1271f1c
+331	1161	1739796841956999701	CMakeFiles/YapApp.dir/main.cpp.o	25d1d8ac32172f7e
+331	1162	1739796841957223950	CMakeFiles/YapApp.dir/widget.cpp.o	563219847e92ecb
+1162	1273	1739796842788865393	YapApp.app/Contents/MacOS/YapApp	86f1104391833835
