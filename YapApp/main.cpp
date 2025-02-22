@@ -1,4 +1,4 @@
-#include "widget.h"
+#include "mainwidget.h"
 #include "mytcpserver.h"
 
 #include <QApplication>
@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    Widget w;
-    w.show();
+    //MainWidget w;
+    //w.show();
     MyTcpServer s;
     return a.exec();
 }
