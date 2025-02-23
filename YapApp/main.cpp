@@ -1,5 +1,4 @@
-#include "mainwidget.h"
-#include "mytcpserver.h"
+#include "yaptcpserver.h"
 
 #include <QApplication>
 #include <QLocale>
@@ -20,6 +19,6 @@ int main(int argc, char *argv[])
     }
     //MainWidget w;
     //w.show();
-    MyTcpServer s;
+    YapTcpServer s;
     return a.exec();
 }

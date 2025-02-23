@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+#Folders
+/YapApp/build
+/YapApp/build
+/YapConsoleClient
+/YapApp/build

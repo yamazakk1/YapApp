@@ -10,12 +10,14 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    mytcpserver.cpp\
-    mainwidget.cpp
+    mainwidget.cpp \
+    user.cpp \
+    yaptcpserver.cpp
 
 HEADERS += \
     mainwidget.h \
-    mytcpserver.h
+    user.h \
+    yaptcpserver.h
 
 FORMS += \
     mainwidget.ui
