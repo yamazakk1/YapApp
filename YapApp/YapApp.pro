@@ -9,18 +9,19 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    httprequest.cpp \
     main.cpp \
-    mainwidget.cpp \
     user.cpp \
-    yaptcpserver.cpp
+    yaptcpserver.cpp \
+    yaserver.cpp
 
 HEADERS += \
-    mainwidget.h \
+    httprequest.h \
     user.h \
-    yaptcpserver.h
+    yaptcpserver.h \
+    yaserver.h
 
-FORMS += \
-    mainwidget.ui
+FORMS +=
 
 TRANSLATIONS += \
     YapApp_ru_RU.ts
