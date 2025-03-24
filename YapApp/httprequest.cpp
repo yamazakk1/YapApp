@@ -2,7 +2,7 @@
 
 QString HttpRequest::header(const QString &name) const
 {
-    return headers.value(name, "");
+    return headers.value(name.toLower(), "");
 }
 
 QString HttpRequest::query(const QString &name) const
@@ -55,7 +55,7 @@ HttpRequest HttpRequest::parse(const QByteArray &rawRequest)
             break;
         QStringList parts = line.split(':');
         if(parts.size() == 2 && !parts[0].isEmpty() && !parts[1].isEmpty())
-            result.headers[parts[0]] = parts[1];
+            result.headers[parts[0].toLower()] = parts[1].trimmed();
     }
 
     QByteArray body;

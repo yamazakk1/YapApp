@@ -1,20 +1,25 @@
 #ifndef YASERVER_H
 #define YASERVER_H
-
+#include <QObject>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QUuid>
+#include <QByteArray>
+#include <QDebug>
+#include "httprequest.h"
+#include "user.h"
+#include "yahttpserver.h"
 
-class YaServer : public QTcpServer
+class YaServer : public QObject
 {
     Q_OBJECT
-
 public:
-    YaServer(QObject* parent = nullptr);
-
-protected:
-    void incomingConnection(qintptr socketDescriptor) override;
-    QString generateToken();
+    explicit YaServer(int port = -1, QObject *parent = nullptr);
+    ~YaServer();
+    void startServer(int port);
+public slots:
+    void newRequest(QTcpSocket& socket, HttpRequest& request);
+    void disconnect(QTcpSocket& socket);
+private:
+    YaHttpServer* httpServer = nullptr;
 };
-
 #endif // YASERVER_H

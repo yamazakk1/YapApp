@@ -12,13 +12,13 @@ SOURCES += \
     httprequest.cpp \
     main.cpp \
     user.cpp \
-    yaptcpserver.cpp \
+    yahttpserver.cpp \
     yaserver.cpp
 
 HEADERS += \
     httprequest.h \
     user.h \
-    yaptcpserver.h \
+    yahttpserver.h \
     yaserver.h
 
 FORMS +=

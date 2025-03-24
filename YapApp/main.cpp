@@ -1,5 +1,5 @@
-#include "yaptcpserver.h"
 #include "yaserver.h"
+#include "yahttpserver.h"
 
 #include <QApplication>
 #include <QLocale>
@@ -18,15 +18,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    //YapTcpServer s;
-    YaServer server;
-    if(!server.listen(QHostAddress::Any, 33333))
-    {
-        qDebug() << "server is not started";
-    }
-    else
-    {
-        qDebug() << "server is started";
-    }
+    YaServer server (33333);
     return a.exec();
 }

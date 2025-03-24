@@ -1,47 +1,65 @@
 #include "yaserver.h"
-#include "httprequest.h"
 
-YaServer::YaServer(QObject *parent) : QTcpServer(parent)
+void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
 {
+    QJsonDocument json;
+    if(request.header("Content-Type" ) == "application/json")
+    {
+        qDebug() <<"json";
+        json = QJsonDocument::fromJson(request.body);}
+
+
+    QByteArray response;
+    QByteArray body = "{}";
+    response.append("HTTP/1.1 200 OK\r\n");
+    response.append("Content-Type: application/json\r\n");
+    response.append("Connection: keep-alive\r\n");
+    if(request.path == "/login")
+    {
+        if (json.isObject()) {
+            QJsonObject obj = json.object();
+            QString name = obj["name"].toString();
+            qDebug() << "Name:" << name;
+        }
+        if(json.object()["name"].toString() == "123")
+            body = "{\"token\":\"" + YaHttpServer::generateToken().toUtf8() + "\"}";
+    }
+    response.append("Content-Length: " + QByteArray::number(body.size()) + "\r\n");
+    response.append("\r\n");
+    response.append(body);
+    socket.write(response);
 }
 
-void YaServer::incomingConnection(qintptr socketDescriptor)
+void YaServer::disconnect(QTcpSocket &socket)
 {
-    QTcpSocket* socket = new QTcpSocket(this);
-    socket->setSocketDescriptor(socketDescriptor);
-
-    connect(socket, &QTcpSocket::readyRead, [socket, this]() {
-        QByteArray requestData = socket->readAll();
-
-        QString requestStr(requestData);
-        qDebug() << "Получен запрос нв:\n " << socket->peerPort();
-
-        auto res = HttpRequest::parse(requestData);
-        qDebug()
-                << "method: " << res.method << "\n"
-            << "path: " << res.path << "\n"
-            << "quary: " << res.queryParams << "\n"
-            << "headers: " << res.headers << "\n"
-            << "body: " << res.body << "\n";
-
-        QByteArray body = "{\"token\":\"" + generateToken().toUtf8() + "\"}";
-        QByteArray response;
-        response.append("HTTP/1.1 200 OK\r\n");
-        response.append("Content-Type: application/json\r\n");
-        response.append("Connection: keep-alive\r\n");
-        response.append("Content-Length: " + QByteArray::number(body.size()) + "\r\n");
-        response.append("\r\n");
-        response.append(body);
-
-        socket->write(response);
-
-    });
-
-    connect(socket, &QTcpSocket::disconnected, socket, &QTcpSocket::deleteLater);
-
+    socket.deleteLater();
 }
 
-QString YaServer::generateToken()
+YaServer::YaServer(int port, QObject *parent)
 {
-     return QUuid::createUuid().toString(QUuid::WithoutBraces);
+    if(port != -1)
+        startServer(port);
+}
+
+YaServer::~YaServer()
+{
+    if (httpServer != nullptr)
+        delete httpServer;
+}
+
+void YaServer::startServer(int port)
+{
+    if (httpServer != nullptr)
+        delete httpServer;
+    httpServer = new YaHttpServer();
+
+    if(!httpServer->listen(QHostAddress::Any, port))
+    {
+        qDebug() << "server is not started";
+        qDebug()<<httpServer->errorString();
+        return;
+    }
+    qDebug() << "server is started at port:" << port;
+    connect(httpServer, &YaHttpServer::newRequest, this, &YaServer::newRequest);
+    connect(httpServer, &YaHttpServer::disconnect, this, &YaServer::disconnect);
 }
