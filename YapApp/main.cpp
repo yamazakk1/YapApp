@@ -18,6 +18,6 @@ int main(int argc, char *argv[])
             break;
         }
     }
-    YaServer server (33333);
+    YaServer::getInstance().startServer(33333);
     return a.exec();
 }

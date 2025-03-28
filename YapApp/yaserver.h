@@ -13,13 +13,18 @@ class YaServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit YaServer(int port = -1, QObject *parent = nullptr);
-    ~YaServer();
+    static YaServer& getInstance();
     void startServer(int port);
+
+    YaServer(const YaServer&) = delete;
+    YaServer& operator=(const YaServer&) = delete;
 public slots:
     void newRequest(QTcpSocket& socket, HttpRequest& request);
     void disconnect(QTcpSocket& socket);
 private:
+    explicit YaServer(QObject *parent = nullptr);
+    ~YaServer();
+
     YaHttpServer* httpServer = nullptr;
 };
 #endif // YASERVER_H

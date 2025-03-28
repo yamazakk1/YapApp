@@ -4,9 +4,7 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
 {
     QJsonDocument json;
     if(request.header("Content-Type" ) == "application/json")
-    {
-        qDebug() <<"json";
-        json = QJsonDocument::fromJson(request.body);}
+        json = QJsonDocument::fromJson(request.body);
 
 
     QByteArray response;
@@ -35,16 +33,20 @@ void YaServer::disconnect(QTcpSocket &socket)
     socket.deleteLater();
 }
 
-YaServer::YaServer(int port, QObject *parent)
+YaServer::YaServer(QObject *parent)
 {
-    if(port != -1)
-        startServer(port);
 }
 
 YaServer::~YaServer()
 {
     if (httpServer != nullptr)
         delete httpServer;
+}
+
+YaServer &YaServer::getInstance()
+{
+    static YaServer instance;
+    return instance;
 }
 
 void YaServer::startServer(int port)
