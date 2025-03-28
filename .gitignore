@@ -32,7 +32,5 @@
 *.app
 
 #Folders
-/YapApp/build
-/YapApp/build
-/YapConsoleClient
-/YapApp/build
+/YapAppClient/build/
+/YapApp/build/
