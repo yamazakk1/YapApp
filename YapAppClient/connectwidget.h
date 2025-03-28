@@ -2,6 +2,8 @@
 #define CONNECTWIDGET_H
 
 #include <QWidget>
+#include <QPushButton>
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,7 +19,15 @@ public:
     ConnectWidget(QWidget *parent = nullptr);
     ~ConnectWidget();
 
+private slots:
+    void on_ConnectButton_pressed();
+    void OnConnect();
+    void OnError();
+
 private:
+    QPushButton* connectBtn;
+    QLineEdit* ipLine;
+    QLineEdit* portLine;
     Ui::ConnectWidget *ui;
 };
 #endif // CONNECTWIDGET_H

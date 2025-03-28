@@ -1,5 +1,5 @@
 QT       += core gui
-
+QT += network
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
@@ -9,13 +9,20 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    chatwidget.cpp \
+    client.cpp \
     main.cpp \
-    connectwidget.cpp
+    connectwidget.cpp \
+    widgetmanager.cpp
 
 HEADERS += \
-    connectwidget.h
+    chatwidget.h \
+    client.h \
+    connectwidget.h \
+    widgetmanager.h
 
 FORMS += \
+    chatwidget.ui \
     connectwidget.ui
 
 # Default rules for deployment.
