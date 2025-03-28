@@ -23,8 +23,6 @@ HEADERS += \
 
 FORMS +=
 
-TRANSLATIONS += \
-    YapApp_ru_RU.ts
 CONFIG += lrelease
 CONFIG += embed_translations
 
