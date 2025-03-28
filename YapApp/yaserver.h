@@ -1,30 +1,29 @@
 #ifndef YASERVER_H
 #define YASERVER_H
+
 #include <QObject>
-#include <QTcpServer>
 #include <QTcpSocket>
-#include <QByteArray>
-#include <QDebug>
-#include "httprequest.h"
-#include "user.h"
 #include "yahttpserver.h"
+#include "database.h"
 
 class YaServer : public QObject
 {
     Q_OBJECT
 public:
     static YaServer& getInstance();
-    void startServer(int port);
 
+    void startServer(int port);
     YaServer(const YaServer&) = delete;
     YaServer& operator=(const YaServer&) = delete;
-public slots:
-    void newRequest(QTcpSocket& socket, HttpRequest& request);
-    void disconnect(QTcpSocket& socket);
+private slots:
+    void newRequest(QTcpSocket &socket, HttpRequest &request);
+    void disconnect(QTcpSocket &socket);
+
 private:
     explicit YaServer(QObject *parent = nullptr);
     ~YaServer();
 
-    YaHttpServer* httpServer = nullptr;
+    YaHttpServer *httpServer = nullptr;
 };
+
 #endif // YASERVER_H
