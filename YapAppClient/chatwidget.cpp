@@ -153,10 +153,8 @@ void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& 
 
     //возвращаем прошлое относительное положение
     QTimer::singleShot(1, [bar, scrollRatio]() {
-        QTimer::singleShot(0, bar, [bar, scrollRatio]() {
-            int newMax = bar->maximum();
-            bar->setValue(qRound(scrollRatio * newMax));
-        });
+        int newMax = bar->maximum();
+        bar->setValue(qRound(scrollRatio * newMax));
     });
 
 }
