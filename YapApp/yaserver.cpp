@@ -1,18 +1,20 @@
 #include "yaserver.h"
+#include "database.h"
+#include "yahttpserver.h"
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDebug>
 
-YaServer::YaServer(QObject *parent) : QObject(parent)
+YaServer::YaServer(QObject *parent) : QObject(parent), httpServer(nullptr)
 {
-    // Initialize database connection
     DatabaseManager::instance();
 }
 
 YaServer::~YaServer()
 {
     if (httpServer != nullptr) {
+        httpServer->close();
         delete httpServer;
     }
 }
@@ -26,20 +28,21 @@ YaServer& YaServer::getInstance()
 void YaServer::startServer(int port)
 {
     if (httpServer != nullptr) {
+        httpServer->close();
         delete httpServer;
     }
 
-    httpServer = new YaHttpServer();
+    httpServer = new YaHttpServer(this);
 
     if (!httpServer->listen(QHostAddress::Any, port)) {
         qDebug() << "Server failed to start:" << httpServer->errorString();
         return;
     }
 
-    qDebug() << "Server started on port:" << port;
-
     connect(httpServer, &YaHttpServer::newRequest, this, &YaServer::newRequest);
     connect(httpServer, &YaHttpServer::disconnect, this, &YaServer::disconnect);
+
+    qDebug() << "Server started on port:" << port;
 }
 
 void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
@@ -51,10 +54,6 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
 
     QByteArray response;
     QByteArray body = "{}";
-    response.append("HTTP/1.1 200 OK\r\n");
-    response.append("Content-Type: application/json\r\n");
-    response.append("Connection: keep-alive\r\n");
-
     DatabaseManager& db = DatabaseManager::instance();
 
     if (request.path == "/register") {
@@ -92,6 +91,26 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
             }
         }
     }
+    else if (request.path == "/contacts/get") {
+        if (json.isObject()) {
+            QJsonObject obj = json.object();
+            QJsonArray contacts = db.getUserContacts(obj["user_id"].toInt());
+            body = QJsonDocument(contacts).toJson();
+        }
+    }
+    else if (request.path == "/contacts/add") {
+        if (json.isObject()) {
+            QJsonObject obj = json.object();
+            bool success = db.addContact(
+                obj["user_id"].toInt(),
+                obj["contact_id"].toInt()
+                );
+
+            QJsonObject responseObj;
+            responseObj["success"] = success;
+            body = QJsonDocument(responseObj).toJson();
+        }
+    }
     else if (request.path == "/messages/send") {
         if (json.isObject()) {
             QJsonObject obj = json.object();
@@ -100,7 +119,6 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 obj["receiver_id"].toInt(),
                 obj["content"].toString()
                 );
-
             QJsonObject responseObj;
             responseObj["success"] = success;
             body = QJsonDocument(responseObj).toJson();
@@ -109,18 +127,23 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
     else if (request.path == "/messages/get") {
         if (json.isObject()) {
             QJsonObject obj = json.object();
-            QJsonArray messages = db.getUserMessages(
-                obj["user_id"].toInt(),
-                obj["limit"].toInt(50)
+            QJsonArray messages = db.getChatMessages(
+                obj["user1_id"].toInt(),
+                obj["user2_id"].toInt(),
+                obj.value("limit").toInt(100)
                 );
             body = QJsonDocument(messages).toJson();
         }
     }
 
+    response.append("HTTP/1.1 200 OK\r\n");
+    response.append("Content-Type: application/json\r\n");
     response.append("Content-Length: " + QByteArray::number(body.size()) + "\r\n");
-    response.append("\r\n");
+    response.append("Connection: close\r\n\r\n");
     response.append(body);
+
     socket.write(response);
+    socket.disconnectFromHost();
 }
 
 void YaServer::disconnect(QTcpSocket &socket)

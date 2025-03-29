@@ -2,25 +2,22 @@
 #include <QSettings>
 #include <QDebug>
 #include <QDateTime>
-
+#include <QCoreApplication>
 DatabaseManager* DatabaseManager::m_instance = nullptr;
 
-DatabaseManager& DatabaseManager::instance()
-{
+DatabaseManager& DatabaseManager::instance() {
     if (!m_instance) {
         m_instance = new DatabaseManager();
     }
     return *m_instance;
 }
 
-DatabaseManager::DatabaseManager(QObject *parent) : QObject(parent)
-{
+DatabaseManager::DatabaseManager(QObject *parent) : QObject(parent) {
     m_db = QSqlDatabase::addDatabase("QPSQL", "server_db_connection");
     connect();
 }
 
-DatabaseManager::~DatabaseManager()
-{
+DatabaseManager::~DatabaseManager() {
     if (m_db.isOpen()) {
         m_db.close();
     }
@@ -28,14 +25,20 @@ DatabaseManager::~DatabaseManager()
 
 bool DatabaseManager::connect() {
     m_db = QSqlDatabase::addDatabase("QPSQL");
-    m_db.setHostName("127.0.0.1");
+
+    // Основные параметры
+    m_db.setHostName("127.0.0.1"); // Явно указываем IPv4
     m_db.setPort(5432);
     m_db.setDatabaseName("yapapp");
-    m_db.setUserName("postgres");
-    m_db.setPassword("123");
+    m_db.setUserName("postgres"); // Или yapapp_user
+    m_db.setPassword("123"); // Ваш пароль
 
-    // Добавьте эту строку для отладки
-    m_db.setConnectOptions("connect_timeout=5;application_name=MyApp");
+    // Важные опции
+    m_db.setConnectOptions(
+        "connect_timeout=5;"
+        "application_name=YapApp;"
+        "requiressl=0" // Если SSL не настроен
+        );
 
     if (!m_db.open()) {
         qDebug() << "Ошибка PostgreSQL:";
@@ -43,29 +46,19 @@ bool DatabaseManager::connect() {
         qDebug() << "Текст:" << m_db.lastError().text();
         return false;
     }
+
+    qDebug() << "Успешное подключение к PostgreSQL!";
     return true;
 }
 
-void DatabaseManager::initDatabaseSchema()
-{
+void DatabaseManager::initDatabaseSchema() {
     QSqlQuery query(m_db);
 
-    // Users table
-    query.exec("CREATE TABLE IF NOT EXISTS users ("
-               "id SERIAL PRIMARY KEY, "
-               "username VARCHAR(50) UNIQUE NOT NULL, "
-               "password_hash VARCHAR(64) NOT NULL, "
-               "email VARCHAR(100) UNIQUE, "
-               "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
-
-    // Messages table
-    query.exec("CREATE TABLE IF NOT EXISTS messages ("
-               "id SERIAL PRIMARY KEY, "
-               "sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
-               "receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
-               "content TEXT NOT NULL, "
-               "sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-               "is_read BOOLEAN DEFAULT FALSE)");
+    // Contacts table
+    query.exec("CREATE TABLE IF NOT EXISTS contacts ("
+               "user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
+               "contact_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
+               "PRIMARY KEY (user_id, contact_id))");
 
     // Indexes
     query.exec("CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id)");
@@ -203,4 +196,65 @@ QJsonObject DatabaseManager::getUserByUsername(const QString &username)
 bool DatabaseManager::isConnected() const
 {
     return m_db.isOpen();
+}
+QJsonArray DatabaseManager::getUserContacts(int userId) {
+    QJsonArray contacts;
+    QSqlQuery query(m_db);
+    query.prepare(
+        "SELECT u.id, u.username, "
+        "(SELECT content FROM messages "
+        "WHERE (sender_id = :user AND receiver_id = u.id) OR "
+        "(sender_id = u.id AND receiver_id = :user) "
+        "ORDER BY sent_at DESC LIMIT 1) AS last_message "
+        "FROM users u "
+        "JOIN contacts c ON u.id = c.contact_id "
+        "WHERE c.user_id = :user"
+        );
+    query.bindValue(":user", userId);
+
+    if (query.exec()) {
+        while (query.next()) {
+            QJsonObject contact;
+            contact["id"] = query.value("id").toInt();
+            contact["name"] = query.value("username").toString();
+            contact["last_message"] = query.value("last_message").toString();
+            contacts.append(contact);
+        }
+    }
+    return contacts;
+}
+
+bool DatabaseManager::addContact(int userId, int contactId) {
+    QSqlQuery query(m_db);
+    query.prepare("INSERT INTO contacts (user_id, contact_id) VALUES (:user, :contact)");
+    query.bindValue(":user", userId);
+    query.bindValue(":contact", contactId);
+    return query.exec();
+}
+
+QJsonArray DatabaseManager::getChatMessages(int user1, int user2, int limit) {
+    QJsonArray messages;
+    QSqlQuery query(m_db);
+    query.prepare(
+        "SELECT content, sender_id, sent_at "
+        "FROM messages "
+        "WHERE (sender_id = :user1 AND receiver_id = :user2) OR "
+        "(sender_id = :user2 AND receiver_id = :user1) "
+        "ORDER BY sent_at DESC "
+        "LIMIT :limit"
+        );
+    query.bindValue(":user1", user1);
+    query.bindValue(":user2", user2);
+    query.bindValue(":limit", limit);
+
+    if (query.exec()) {
+        while (query.next()) {
+            QJsonObject msg;
+            msg["text"] = query.value("content").toString();
+            msg["is_my"] = (query.value("sender_id").toInt() == user1);
+            msg["time"] = query.value("sent_at").toDateTime().toString("HH:mm");
+            messages.append(msg);
+        }
+    }
+    return messages;
 }

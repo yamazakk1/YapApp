@@ -8,7 +8,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QCryptographicHash>
-
+#include <QCoreApplication>
 class DatabaseManager : public QObject
 {
     Q_OBJECT
@@ -30,6 +30,9 @@ public:
     bool markMessageAsRead(int messageId);
 
     void initDatabaseSchema();
+    QJsonArray getUserContacts(int userId);
+    bool addContact(int userId, int contactId);
+    QJsonArray getChatMessages(int user1, int user2, int limit = 100);
 private:
     explicit DatabaseManager(QObject *parent = nullptr);
     ~DatabaseManager();
