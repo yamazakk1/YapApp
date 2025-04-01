@@ -12,6 +12,7 @@ SOURCES += \
     authorizationwidget.cpp \
     chatwidget.cpp \
     client.cpp \
+    httpresponse.cpp \
     main.cpp \
     connectwidget.cpp \
     widgetmanager.cpp
@@ -21,10 +22,10 @@ HEADERS += \
     chatwidget.h \
     client.h \
     connectwidget.h \
+    httpresponse.h \
     widgetmanager.h
 
 FORMS += \
-    chatwidget.ui \
     connectwidget.ui
 
 # Default rules for deployment.

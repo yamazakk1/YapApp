@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,6 +18,7 @@ class ConnectWidget : public QWidget
 
 public:
     ConnectWidget(QWidget *parent = nullptr);
+    void SetErrorMessage(const QString text);
     ~ConnectWidget();
 
 private slots:
@@ -26,6 +28,7 @@ private slots:
 
 private:
     QPushButton* connectBtn;
+    QLabel* errorLabel;
     QLineEdit* ipLine;
     QLineEdit* portLine;
     Ui::ConnectWidget *ui;

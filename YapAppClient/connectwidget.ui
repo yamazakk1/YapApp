@@ -40,7 +40,7 @@
     </spacer>
    </item>
    <item alignment="Qt::AlignmentFlag::AlignHCenter">
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="ErrorLabel">
      <property name="text">
       <string>Error</string>
      </property>

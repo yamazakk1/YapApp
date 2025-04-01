@@ -45,3 +45,8 @@ QWidget* WidgetManager::getWidget(const QString& name) const
 {
     return widgets.value(name, nullptr);
 }
+
+QWidget* WidgetManager::getCurrent() const
+{
+    return current;
+}

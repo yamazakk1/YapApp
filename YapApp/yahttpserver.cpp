@@ -30,6 +30,9 @@ void YaHttpServer::incomingConnection(qintptr socketDescriptor)
     {
         emit disconnect(*socket);
     });
+    connect(socket, &QTcpSocket::errorOccurred, this, [](QAbstractSocket::SocketError err) {
+        qDebug() << "Ошибка сокета:" << err;
+    });
 }
 
 QString YaHttpServer::generateToken()

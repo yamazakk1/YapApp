@@ -2,6 +2,8 @@
 #define AUTHORIZATIONWIDGET_H
 
 #include <QWidget>
+#include <QJsonObject>
+#include <QJsonArray>
 
 class QLineEdit;
 class QPushButton;
@@ -14,9 +16,10 @@ public:
     AuthorizationWidget(QWidget *parent = nullptr);
 
 private slots:
-    void handleAuthAction();
+    void handleButtonAuthAction();
     void switchMode();
-
+    void onRegisterSuccess();
+    void onLoginSuccess(QJsonObject user);
 private:
     void updateForm();
 

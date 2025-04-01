@@ -8,7 +8,8 @@
 
 YaServer::YaServer(QObject *parent) : QObject(parent), httpServer(nullptr)
 {
-    DatabaseManager::instance();
+    DatabaseManager::instance().connect();
+    DatabaseManager::instance().initDatabaseSchema();
 }
 
 YaServer::~YaServer()
@@ -47,6 +48,7 @@ void YaServer::startServer(int port)
 
 void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
 {
+    qDebug() << "new request";
     QJsonDocument json;
     if (request.header("Content-Type") == "application/json") {
         json = QJsonDocument::fromJson(request.body);
@@ -66,6 +68,7 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 );
 
             QJsonObject responseObj;
+            responseObj["type"] = "register";
             responseObj["success"] = success;
             if (!success) {
                 responseObj["error"] = "Registration failed";
@@ -82,10 +85,12 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 );
 
             if (!user.isEmpty()) {
+                user["type"] = "login";
                 user["token"] = YaHttpServer::generateToken();
                 body = QJsonDocument(user).toJson();
             } else {
                 QJsonObject error;
+                error["type"] = "login";
                 error["error"] = "Authentication failed";
                 body = QJsonDocument(error).toJson();
             }
@@ -95,7 +100,10 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
         if (json.isObject()) {
             QJsonObject obj = json.object();
             QJsonArray contacts = db.getUserContacts(obj["user_id"].toInt());
-            body = QJsonDocument(contacts).toJson();
+            QJsonObject responseObj;
+            responseObj["type"] = "contacts";
+            responseObj["contacts"] = contacts;
+            body = QJsonDocument(responseObj).toJson();
         }
     }
     else if (request.path == "/contacts/add") {
@@ -107,6 +115,7 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 );
 
             QJsonObject responseObj;
+            responseObj["type"] = "contacts_add";
             responseObj["success"] = success;
             body = QJsonDocument(responseObj).toJson();
         }
@@ -120,6 +129,7 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 obj["content"].toString()
                 );
             QJsonObject responseObj;
+            responseObj["type"] = "messages_send";
             responseObj["success"] = success;
             body = QJsonDocument(responseObj).toJson();
         }
@@ -132,18 +142,20 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 obj["user2_id"].toInt(),
                 obj.value("limit").toInt(100)
                 );
-            body = QJsonDocument(messages).toJson();
+            QJsonObject responseObj;
+            responseObj["type"] = "messages";
+            responseObj["messages"] = messages;
+            body = QJsonDocument(responseObj).toJson();
         }
     }
 
     response.append("HTTP/1.1 200 OK\r\n");
     response.append("Content-Type: application/json\r\n");
     response.append("Content-Length: " + QByteArray::number(body.size()) + "\r\n");
-    response.append("Connection: close\r\n\r\n");
+    response.append("Connection: keep-alive\r\n\r\n");
     response.append(body);
 
     socket.write(response);
-    socket.disconnectFromHost();
 }
 
 void YaServer::disconnect(QTcpSocket &socket)

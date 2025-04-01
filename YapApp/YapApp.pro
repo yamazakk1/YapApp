@@ -1,4 +1,3 @@
-QT       += core gui
 QT += core gui sql
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -22,7 +21,6 @@ HEADERS += \
     user.h \
     yahttpserver.h \
     yaserver.h
-
 FORMS +=
 
 TRANSLATIONS +=
@@ -30,6 +28,8 @@ CONFIG += lrelease
 CONFIG += embed_translations
 
 QT += network
+
+
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

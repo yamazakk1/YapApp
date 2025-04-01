@@ -1,4 +1,8 @@
 #include "client.h"
+#include "widgetmanager.h"
+#include "connectwidget.h"
+#include "httpresponse.h"
+
 
 Client &Client::getInstance()
 {
@@ -8,7 +12,27 @@ Client &Client::getInstance()
 
 void Client::Connect(QString ip, int port)
 {
-    socket->connectToHost(ip, port);
+    m_socket->connectToHost(ip, port);
+    m_ip = ip;
+    m_port = port;
+}
+
+void Client::SendHttp(const QString metodeName, const QString url,  QJsonObject json) const
+{
+    QString message = QString("%1 %2 HTTP/1.1/nHost: %3\r\n").arg(metodeName, url, m_ip);
+    message.append("Connection: keep-alive\r\n");
+    message.append("Content-Type: application/json\r\n");
+    if (!json.isEmpty()) {
+        QJsonDocument doc(json);
+        QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
+        message.append(QString("Content-Length: %1\r\n").arg(jsonData.size()));
+        message.append("\r\n");
+        message.append(QString::fromUtf8(jsonData));
+    } else {
+        message.append("Content-Length: 0\r\n");
+        message.append("\r\n");
+    }
+    m_socket->write(message.toUtf8());
 }
 
 Client::~Client()
@@ -18,11 +42,17 @@ Client::~Client()
 
 Client::Client()
 {
-    socket = new QTcpSocket();
-    connect(socket, &QTcpSocket::connected, this, &Client::onConnected);
-    connect(socket, &QTcpSocket::readyRead, this, &Client::onReadyRead);
-    connect(socket, &QTcpSocket::disconnected, this, &Client::onDisconnected);
-    connect(socket, &QTcpSocket::errorOccurred, this, &Client::onError);
+    m_socket = new QTcpSocket();
+    connect(m_socket, &QTcpSocket::connected, this, &Client::onConnected);
+    connect(m_socket, &QTcpSocket::readyRead, this, &Client::onReadyRead);
+    connect(m_socket, &QTcpSocket::disconnected, this, &Client::onDisconnected);
+    connect(m_socket, &QTcpSocket::errorOccurred, this, &Client::onErrorSocketConnect);
+    connect(this, &Client::OnErrorResponse, this, &Client::onErrorResponse);
+}
+
+void Client::onErrorResponse(QString message)
+{
+    qDebug() << "Error response: "<< message;
 }
 
 void Client::onConnected()
@@ -33,18 +63,90 @@ void Client::onConnected()
 
 void Client::onReadyRead()
 {
-    QByteArray response = socket->readAll();
-    qDebug() << "Response from server:\n" << response;
+    QByteArray responseData = m_socket->readAll();
+    HttpResponse response = HttpResponse::parse(responseData);
+
+    // Проверка корректности ответа
+    if (!response.isValid()) {
+        emit OnErrorResponse("Некорректный HTTP-ответ от сервера.");
+        return;
+    }
+
+    // Проверка статуса
+    if (response.statusCode != 200) {
+        emit OnErrorResponse(QString("Ошибка от сервера: %1 %2")
+                         .arg(response.statusCode)
+                         .arg(response.statusText));
+        return;
+    }
+
+    // Проверка, что это JSON
+    if (!response.isJson()) {
+        emit OnErrorResponse("Ожидался JSON, но получен другой тип данных.");
+        return;
+    }
+
+    // Парсим JSON
+    QJsonDocument doc = response.json();
+    if (doc.isObject()) {
+        QJsonObject obj = doc.object();
+        QString type = obj.value("type").toString();
+
+        if (type == "login") {
+            if (obj.contains("token"))
+                emit OnLoginSuccess(obj);
+            else
+                emit OnErrorResponse("Ошибка авторизации.");
+        }
+        else if (type == "register") {
+            if (obj.value("success").toBool())
+                emit OnRegisterSuccess();
+            else
+                emit OnErrorResponse(obj.value("error").toString("Ошибка регистрации."));
+        }
+        else if (type == "contacts") {
+            emit OnContactsReceived(obj.value("contacts").toArray());
+        }
+        else if (type == "contacts_add") {
+            if (obj.value("success").toBool())
+                emit OnContactAdded();
+            else
+                emit OnErrorResponse("Не удалось добавить контакт.");
+        }
+        else if (type == "messages") {
+            emit OnMessagesReceived(obj.value("messages").toArray());
+        }
+        else if (type == "messages_send") {
+            if (obj.value("success").toBool())
+                emit OnMessageSent();
+            else
+                emit OnErrorResponse("Ошибка при отправке сообщения.");
+        }
+        else {
+            emit OnErrorResponse("Неизвестный тип ответа: " + type);
+        }
+    }
+    else {
+        emit OnErrorResponse("Неподдерживаемый JSON-ответ.");
+    }
 }
 
 void Client::onDisconnected()
 {
     qDebug() << "Disconected";
+    qDebug() << "Try reconect";
+    m_socket->connectToHost(m_ip, m_port);
 }
 
-void Client::onError()
+void Client::onErrorSocketConnect()
 {
     emit OnErrorConnect();
+    ConnectWidget* connectWidget = qobject_cast<ConnectWidget*>(WidgetManager::getInstance().getWidget("connect"));
+    if(WidgetManager::getInstance().getCurrent() != connectWidget)
+    {
+        WidgetManager::getInstance().showWidget("connect");
+        connectWidget->SetErrorMessage("Error while reconect");
+    }
 }
 
 

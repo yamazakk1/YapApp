@@ -5,6 +5,8 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QTimer>
+#include "client.h"
+#include "widgetmanager.h"
 
 AuthorizationWidget::AuthorizationWidget(QWidget *parent)
     : QWidget(parent), isLoginMode(true) {
@@ -40,9 +42,10 @@ AuthorizationWidget::AuthorizationWidget(QWidget *parent)
     layout->addWidget(switchModeButton);
     layout->addWidget(statusLabel);
 
-    connect(authButton, &QPushButton::clicked, this, &AuthorizationWidget::handleAuthAction);
+    connect(authButton, &QPushButton::clicked, this, &AuthorizationWidget::handleButtonAuthAction);
     connect(switchModeButton, &QPushButton::clicked, this, &AuthorizationWidget::switchMode);
-
+    connect(&Client::getInstance(), &Client::OnRegisterSuccess, this, &AuthorizationWidget::onRegisterSuccess);
+    connect(&Client::getInstance(), &Client::OnLoginSuccess, this, &AuthorizationWidget::onLoginSuccess);
     updateForm();
 }
 
@@ -50,6 +53,24 @@ void AuthorizationWidget::switchMode() {
     isLoginMode = !isLoginMode;
     statusLabel->clear();
     updateForm();
+}
+
+void AuthorizationWidget::onRegisterSuccess()
+{
+    if(!isLoginMode)
+        switchMode();
+    statusLabel->setStyleSheet("color: green");
+    statusLabel->setText("Регистрация успешна!");
+}
+
+void AuthorizationWidget::onLoginSuccess(QJsonObject user)
+{
+    statusLabel->setStyleSheet("color: green");
+    statusLabel->setText("Вход успешен!");
+    Client::getInstance().username = user["username"].toString();
+    Client::getInstance().usernameId = user["id"].toInt();
+    Client::getInstance().token = user["token"].toString();
+    WidgetManager::getInstance().showWidget("chat");
 }
 
 void AuthorizationWidget::updateForm() {
@@ -74,7 +95,7 @@ void AuthorizationWidget::updateForm() {
     });
 }
 
-void AuthorizationWidget::handleAuthAction() {
+void AuthorizationWidget::handleButtonAuthAction() {
     QString email = emailEdit->text().trimmed();
     QString password = passwordEdit->text();
     QStringList errors;
@@ -106,11 +127,14 @@ void AuthorizationWidget::handleAuthAction() {
         return;
     }
 
+    QJsonObject respose;
+    respose["username"] = usernameEdit->text();
+    respose["password"] = passwordEdit->text();
+    respose["email"] = emailEdit->text();
     if (isLoginMode) {
-        statusLabel->setStyleSheet("color: green");
-        statusLabel->setText("Успешный вход!");
+        Client::getInstance().SendHttp("POST", "/login", respose);
+
     } else {
-        statusLabel->setStyleSheet("color: green");
-        statusLabel->setText("Регистрация успешна!");
+        Client::getInstance().SendHttp("POST", "/register", respose);
     }
 }

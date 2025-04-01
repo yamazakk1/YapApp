@@ -13,8 +13,6 @@ DatabaseManager& DatabaseManager::instance() {
 }
 
 DatabaseManager::DatabaseManager(QObject *parent) : QObject(parent) {
-    m_db = QSqlDatabase::addDatabase("QPSQL", "server_db_connection");
-    connect();
 }
 
 DatabaseManager::~DatabaseManager() {
@@ -24,14 +22,15 @@ DatabaseManager::~DatabaseManager() {
 }
 
 bool DatabaseManager::connect() {
-    m_db = QSqlDatabase::addDatabase("QPSQL");
-
+    m_db = QSqlDatabase::addDatabase("QPSQL", "yapapp");
+    if (m_db.isOpen())
+        return true;
     // Основные параметры
-    m_db.setHostName("127.0.0.1"); // Явно указываем IPv4
-    m_db.setPort(5432);
+    m_db.setHostName("localhost"); // Явно указываем IPv4
+    m_db.setPort(5488);
     m_db.setDatabaseName("yapapp");
     m_db.setUserName("postgres"); // Или yapapp_user
-    m_db.setPassword("123"); // Ваш пароль
+    m_db.setPassword("321"); // Ваш пароль
 
     // Важные опции
     m_db.setConnectOptions(
@@ -54,6 +53,23 @@ bool DatabaseManager::connect() {
 void DatabaseManager::initDatabaseSchema() {
     QSqlQuery query(m_db);
 
+    // Users table
+            query.exec("CREATE TABLE IF NOT EXISTS users ("
+                       "id SERIAL PRIMARY KEY, "
+                       "username TEXT UNIQUE NOT NULL, "
+                       "password_hash TEXT NOT NULL, "
+                       "email TEXT UNIQUE NOT NULL"
+                       ")");
+
+    // Messages table
+    query.exec("CREATE TABLE IF NOT EXISTS messages ("
+               "id SERIAL PRIMARY KEY, "
+               "sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
+               "receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
+               "content TEXT NOT NULL, "
+               "sent_at TIMESTAMP DEFAULT NOW(), "
+               "is_read BOOLEAN DEFAULT FALSE"
+               ")");
     // Contacts table
     query.exec("CREATE TABLE IF NOT EXISTS contacts ("
                "user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "

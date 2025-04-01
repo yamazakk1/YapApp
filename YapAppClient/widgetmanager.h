@@ -15,6 +15,7 @@ public:
     void addWidget(const QString& name, QWidget* widget);
     void showWidget(const QString& name);
     QWidget* getWidget(const QString& name) const;
+    QWidget* getCurrent() const;
 
     WidgetManager(const WidgetManager&) = delete;
     WidgetManager& operator=(const WidgetManager&) = delete;
