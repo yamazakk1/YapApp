@@ -99,6 +99,14 @@ ChatWidget::ChatWidget(QWidget *parent)
             this, &ChatWidget::onContactAdded);
     connect(&Client::getInstance(), &Client::OnContactsReceived,
             this, &ChatWidget::onContactsReceived);
+    connect(&Client::getInstance(), &Client::OnMessagesReceived,
+            this, &ChatWidget::onMessagesReceived);
+    connect(contactList, &QListWidget::itemClicked,
+            this, &ChatWidget::onContactClicked);
+
+    QTimer* refreshTimer = new QTimer(this);
+    connect(refreshTimer, &QTimer::timeout, this, &ChatWidget::onRefreshClicked);
+    refreshTimer->start(10000);
 }
 
 void ChatWidget::showEvent(QShowEvent* event)
@@ -154,7 +162,7 @@ void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& 
 
     QWidget* bubbleWidget = new QWidget();
     bubbleWidget->setLayout(bubbleLayout);
-    messageLayout->insertWidget(messageLayout->count() - 1, bubbleWidget);
+    messageLayout->insertWidget(messageLayout->count()-1, bubbleWidget);
 
     //возвращаем прошлое относительное положение
     QTimer::singleShot(1, [bar, scrollRatio]() {
@@ -164,6 +172,15 @@ void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& 
 
 }
 
+void ChatWidget::getMessagesFromUser(const int userId)
+{
+    currentUserIdChat = userId;
+    QJsonObject obj;
+    obj["user1_id"] = Client::getInstance().userId;
+    obj["user2_id"] = userId;
+    Client::getInstance().SendHttp("POST", "/messages/get", obj);
+}
+
 
 void ChatWidget::setActiveUser(const QString& username)
 {
@@ -171,17 +188,24 @@ void ChatWidget::setActiveUser(const QString& username)
     chatScrollArea->verticalScrollBar()->setValue(chatScrollArea->verticalScrollBar()->maximum());
 }
 
-void ChatWidget::addContact(const QString& name, const QString& lastMessage)
+void ChatWidget::addContact(const int user_id, const QString& name, const QString& lastMessage)
 {
     QListWidgetItem* item = new QListWidgetItem(QString("%1\n%2").arg(name, lastMessage));
+    item->setData(Qt::UserRole, user_id);
+    item->setData(Qt::UserRole+1, name);
     contactList->addItem(item);
 }
 
 void ChatWidget::onSendClicked()
 {
     QString text = messageInput->text().trimmed();
-    if (!text.isEmpty()) {
+    if (!text.isEmpty() && currentUserIdChat != -1) {
         addMessageBubble(text, true, QTime::currentTime());
+        QJsonObject obj;
+        obj["sender_id"] = Client::getInstance().userId;
+        obj["receiver_id"] = currentUserIdChat;
+        obj["content"] = text;
+        Client::getInstance().SendHttp("POST", "/messages/send", obj);
         messageInput->clear();
     }
 }
@@ -191,6 +215,10 @@ void ChatWidget::onRefreshClicked()
     QJsonObject obj;
     obj["user_id"] = Client::getInstance().userId;
     Client::getInstance().SendHttp("POST", "/contacts/get", obj);
+    if(currentUserIdChat != -1)
+    {
+        getMessagesFromUser(currentUserIdChat);
+    }
 }
 
 void ChatWidget::onSearchClicked()
@@ -205,11 +233,63 @@ void ChatWidget::onContactsReceived(QJsonArray contacts)
         QJsonObject contact = value.toObject();
         QString name = contact["name"].toString();
         QString lastMessage = contact["last_message"].toString();
-        addContact(name, lastMessage);
+        addContact(contact["id"].toInt(), name, lastMessage);
     }
 }
 
 void ChatWidget::onContactAdded()
 {
     onRefreshClicked();
+}
+
+void ChatWidget::onContactClicked(QListWidgetItem *item)
+{
+    int userId = item->data(Qt::UserRole).toInt();
+    QString userName = item->data(Qt::UserRole+1).toString();
+    currentUserIdChat = userId;
+    currentUserLabel->setText(userName);
+    getMessagesFromUser(userId);
+}
+
+void clearLayout(QLayout* layout)
+{
+    if (!layout) return;
+
+    while (QLayoutItem* item = layout->takeAt(0)) {
+        if (QWidget* widget = item->widget()) {
+            widget->deleteLater();
+        }
+
+        if (QLayout* childLayout = item->layout()) {
+            clearLayout(childLayout);
+        }
+
+        delete item;
+    }
+}
+
+void ChatWidget::onMessagesReceived(QJsonArray messages)
+{
+    clearLayout(messageLayout);
+    messageLayout->addStretch();
+    QList<QJsonObject> sortedMessages;
+
+    for (const QJsonValue& val : messages) {
+        sortedMessages.append(val.toObject());
+    }
+
+    std::reverse(sortedMessages.begin(), sortedMessages.end());
+
+    for (const QJsonObject& msg : sortedMessages) {
+        QString text = msg["text"].toString();
+        bool isOwn = msg["is_my"].toBool();
+        QTime time = QDateTime::fromString(msg["sent_at"].toString(), Qt::ISODate)
+                         .toLocalTime().time();
+
+        addMessageBubble(text, isOwn, time);
+    }
+
+    QScrollBar* scrollBar = chatScrollArea->verticalScrollBar();
+    if (scrollBar)
+        scrollBar->setValue(scrollBar->maximum());
 }

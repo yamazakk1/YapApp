@@ -19,7 +19,7 @@ void Client::Connect(QString ip, int port)
 
 void Client::SendHttp(const QString metodeName, const QString url,  QJsonObject json) const
 {
-    QString message = QString("%1 %2 HTTP/1.1/nHost: %3\r\n").arg(metodeName, url, m_ip);
+    QString message = QString("%1 %2 HTTP/1.1\r\nHost: %3\r\n").arg(metodeName, url, m_ip);
     message.append("Connection: keep-alive\r\n");
     message.append("Content-Type: application/json\r\n");
     if (!json.isEmpty()) {
@@ -63,77 +63,105 @@ void Client::onConnected()
 
 void Client::onReadyRead()
 {
-    QByteArray responseData = m_socket->readAll();
-    HttpResponse response = HttpResponse::parse(responseData);
+    static QByteArray buffer; // сохраняет данные между вызовами
 
-    // Проверка корректности ответа
-    if (!response.isValid()) {
-        emit OnErrorResponse("Некорректный HTTP-ответ от сервера.");
-        return;
-    }
+    buffer += m_socket->readAll();
 
-    // Проверка статуса
-    if (response.statusCode != 200) {
-        emit OnErrorResponse(QString("Ошибка от сервера: %1 %2")
-                         .arg(response.statusCode)
-                         .arg(response.statusText));
-        return;
-    }
+    while (true) {
+        int headerEndIndex = buffer.indexOf("\r\n\r\n");
+        if (headerEndIndex == -1)
+            return; // ждем оставшиеся заголовки
 
-    // Проверка, что это JSON
-    if (!response.isJson()) {
-        emit OnErrorResponse("Ожидался JSON, но получен другой тип данных.");
-        return;
-    }
+        QByteArray headerPart = buffer.left(headerEndIndex);
+        QList<QByteArray> lines = headerPart.split('\n');
 
-    // Парсим JSON
-    QJsonDocument doc = response.json();
-    if (doc.isObject()) {
-        QJsonObject obj = doc.object();
-        QString type = obj.value("type").toString();
+        // Получаем Content-Length
+        int contentLength = 0;
+        for (const QByteArray& line : lines) {
+            if (line.toLower().startsWith("content-length:")) {
+                contentLength = line.mid(QString("content-length:").length()).trimmed().toInt();
+                break;
+            }
+        }
 
-        if (type == "login") {
-            if (obj.contains("token"))
-                emit OnLoginSuccess(obj);
-            else
-                emit OnLoginError("Ошибка авторизации. Неверный логин или пароль.");
+        int fullLength = headerEndIndex + 4 + contentLength;
+        if (buffer.size() < fullLength)
+            return; // ждем остальное тело
+
+        QByteArray fullResponse = buffer.left(fullLength);
+        buffer = buffer.mid(fullLength); // удалить обработанное
+
+        HttpResponse response = HttpResponse::parse(fullResponse);
+
+        // Проверка корректности ответа
+        if (!response.isValid()) {
+            emit OnErrorResponse("Некорректный HTTP-ответ от сервера.");
+            return;
         }
-        else if (type == "register") {
-            if (obj.value("success").toBool())
-                emit OnRegisterSuccess();
-            else
-                emit OnRegisterError("Ошибка регистрации. Email или имя пользователся уже занято.");
+
+        // Проверка статуса
+        if (response.statusCode != 200) {
+            emit OnErrorResponse(QString("Ошибка от сервера: %1 %2")
+                             .arg(response.statusCode)
+                             .arg(response.statusText));
+            return;
         }
-        else if (type == "contacts") {
-            emit OnContactsReceived(obj.value("contacts").toArray());
+
+        // Проверка, что это JSON
+        if (!response.isJson()) {
+            emit OnErrorResponse("Ожидался JSON, но получен другой тип данных.");
+            return;
         }
-        else if (type == "contacts_add") {
-            if (obj.value("success").toBool())
-                emit OnContactAdded();
-            else
-                emit OnContactAddError("Не удалось добавить контакт.");
-        }
-        else if (type == "messages") {
-            emit OnMessagesReceived(obj.value("messages").toArray());
-        }
-        else if (type == "messages_send") {
-            if (obj.value("success").toBool())
-                emit OnMessageSent();
-            else
-                emit OnErrorResponse("Ошибка при отправке сообщения.");
-        }
-        else if (type == "user_search") {
-            if (obj.value("success").toBool())
-                emit OnUserSearchSuccess(obj);
-            else
-                emit OnUserSearchError("Пользователь не найден");
+
+        // Парсим JSON
+        QJsonDocument doc = response.json();
+        if (doc.isObject()) {
+            QJsonObject obj = doc.object();
+            QString type = obj.value("type").toString();
+
+            if (type == "login") {
+                if (obj.contains("token"))
+                    emit OnLoginSuccess(obj);
+                else
+                    emit OnLoginError("Ошибка авторизации. Неверный логин или пароль.");
+            }
+            else if (type == "register") {
+                if (obj.value("success").toBool())
+                    emit OnRegisterSuccess();
+                else
+                    emit OnRegisterError("Ошибка регистрации. Email или имя пользователся уже занято.");
+            }
+            else if (type == "contacts") {
+                emit OnContactsReceived(obj.value("contacts").toArray());
+            }
+            else if (type == "contacts_add") {
+                if (obj.value("success").toBool())
+                    emit OnContactAdded();
+                else
+                    emit OnContactAddError("Не удалось добавить контакт.");
+            }
+            else if (type == "messages") {
+                emit OnMessagesReceived(obj.value("messages").toArray());
+            }
+            else if (type == "messages_send") {
+                if (obj.value("success").toBool())
+                    emit OnMessageSent();
+                else
+                    emit OnErrorResponse("Ошибка при отправке сообщения.");
+            }
+            else if (type == "user_search") {
+                if (obj.value("success").toBool())
+                    emit OnUserSearchSuccess(obj);
+                else
+                    emit OnUserSearchError("Пользователь не найден");
+            }
+            else {
+                emit OnErrorResponse("Неизвестный тип ответа: " + type);
+            }
         }
         else {
-            emit OnErrorResponse("Неизвестный тип ответа: " + type);
+            emit OnErrorResponse("Неподдерживаемый JSON-ответ.");
         }
-    }
-    else {
-        emit OnErrorResponse("Неподдерживаемый JSON-ответ.");
     }
 }
 

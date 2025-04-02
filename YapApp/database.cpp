@@ -67,7 +67,7 @@ void DatabaseManager::initDatabaseSchema() {
                "sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
                "receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
                "content TEXT NOT NULL, "
-               "sent_at TIMESTAMP DEFAULT NOW(), "
+               "sent_at TIMESTAMPTZ DEFAULT NOW(), "
                "is_read BOOLEAN DEFAULT FALSE"
                ")");
     // Contacts table
@@ -124,11 +124,15 @@ QJsonObject DatabaseManager::authenticateUser(const QString &email, const QStrin
 bool DatabaseManager::sendMessage(int senderId, int receiverId, const QString &content)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO messages (sender_id, receiver_id, content) "
-                  "VALUES (:sender, :receiver, :content)");
+    query.prepare("INSERT INTO messages (sender_id, receiver_id, content, sent_at) "
+                  "VALUES (:sender, :receiver, :content, :sent_at)");
+
     query.bindValue(":sender", senderId);
     query.bindValue(":receiver", receiverId);
     query.bindValue(":content", content);
+
+    QDateTime now = QDateTime::currentDateTimeUtc();
+    query.bindValue(":sent_at", now);
 
     return query.exec();
 }
@@ -154,7 +158,7 @@ QJsonArray DatabaseManager::getUserMessages(int userId, int limit)
             QJsonObject msg;
             msg["id"] = query.value("id").toInt();
             msg["content"] = query.value("content").toString();
-            msg["sent_at"] = query.value("sent_at").toDateTime().toString(Qt::ISODate);
+            msg["sent_at"] = query.value("sent_at").toDateTime().toLocalTime().toString(Qt::ISODate);
             msg["is_read"] = query.value("is_read").toBool();
             msg["sender"] = query.value("sender_name").toString();
             msg["receiver"] = query.value("receiver_name").toString();
@@ -270,7 +274,8 @@ QJsonArray DatabaseManager::getChatMessages(int user1, int user2, int limit) {
             QJsonObject msg;
             msg["text"] = query.value("content").toString();
             msg["is_my"] = (query.value("sender_id").toInt() == user1);
-            msg["time"] = query.value("sent_at").toDateTime().toString("HH:mm");
+            QDateTime dt = query.value("sent_at").toDateTime();
+            msg["sent_at"] = dt.toString(Qt::ISODateWithMs);
             messages.append(msg);
         }
     }

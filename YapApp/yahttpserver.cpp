@@ -12,19 +12,47 @@ void YaHttpServer::incomingConnection(qintptr socketDescriptor)
 
     connect(socket, &QTcpSocket::readyRead, [socket, this]()
     {
-        QByteArray requestData = socket->readAll();
+        static QByteArray buffer;
+        buffer += socket->readAll();
 
-        QString requestStr(requestData);
-        qDebug() << "Socket request on port:\n " << socket->peerPort();
+        while (true) {
+            int headerEndIndex = buffer.indexOf("\r\n\r\n");
+            if (headerEndIndex == -1)
+                return; // ждём остальную часть заголовков
 
-        auto res = HttpRequest::parse(requestData);
-        qDebug()
-            << "method: " << res.method << "\n"
-            << "path: " << res.path << "\n"
-            << "quary: " << res.queryParams << "\n"
-            << "headers: " << res.headers << "\n"
-            << "body: " << res.body << "\n";
-        emit newRequest(*socket, res);
+            QByteArray headersPart = buffer.left(headerEndIndex);
+            QList<QByteArray> lines = headersPart.split('\n');
+            if (lines.isEmpty())
+                return;
+
+            // Получаем Content-Length
+            int contentLength = 0;
+            for (const QByteArray& line : lines) {
+                if (line.toLower().startsWith("content-length:")) {
+                    contentLength = line.mid(QString("content-length:").length()).trimmed().toInt();
+                }
+            }
+
+            int totalRequestLength = headerEndIndex + 4 + contentLength;
+            if (buffer.size() < totalRequestLength)
+                return; // ждём остальную часть body
+
+            QByteArray oneRequest = buffer.left(totalRequestLength);
+            buffer = buffer.mid(totalRequestLength); // удаляем обработанную часть
+
+            // Парсим запрос
+            HttpRequest res = HttpRequest::parse(oneRequest);
+            qDebug()
+                << "method: " << res.method << "\n"
+                << "path: " << res.path << "\n"
+                << "quary: " << res.queryParams << "\n"
+                << "headers: " << res.headers << "\n"
+                << "body: " << res.body << "\n";
+
+            emit newRequest(*socket, res);
+
+            // если остались данные — цикл обработает следующий
+        }
     });
     connect(socket, &QTcpSocket::disconnected, [socket, this]()
     {

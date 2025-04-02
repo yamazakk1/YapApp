@@ -24,9 +24,10 @@ class ChatWidget : public QWidget
 public:
     explicit ChatWidget(QWidget *parent = nullptr);
 
-    void addContact(const QString& name, const QString& lastMessage);
+    void addContact(const int user_id, const QString& name, const QString& lastMessage);
     void setActiveUser(const QString& username);
     void addMessageBubble(const QString& text, bool isOwn, const QTime& time);
+    void getMessagesFromUser(const int userId);
 protected:
     void showEvent(QShowEvent* event) override;
 private slots:
@@ -35,6 +36,8 @@ private slots:
     void onSearchClicked();
     void onContactsReceived(QJsonArray contacts);
     void onContactAdded();
+    void onContactClicked(QListWidgetItem* item);
+    void onMessagesReceived(QJsonArray messages);
 private:
     QListWidget* contactList;
     QPushButton* searchButton;
@@ -49,6 +52,7 @@ private:
     QLineEdit* messageInput;
     QPushButton* sendButton;
     SearchContactWidget* searchWidget;
+    int currentUserIdChat = -1;
 };
 
 
