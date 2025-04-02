@@ -21,7 +21,7 @@ public:
 
     QString username;
     QString token;
-    int usernameId = -1;
+    int userId = -1;
 signals:
     void OnConnected();
     void OnErrorConnect();

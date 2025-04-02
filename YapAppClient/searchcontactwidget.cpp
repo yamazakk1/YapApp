@@ -58,6 +58,13 @@ SearchContactWidget::SearchContactWidget(QWidget *parent)
             this, &SearchContactWidget::onContactAddError);
 }
 
+void SearchContactWidget::showEvent(QShowEvent *event)
+{
+    foundUserContainer->hide();
+    addContactButton->hide();
+    errorLabel->hide();
+}
+
 void SearchContactWidget::onSearchClicked()
 {
     foundUserContainer->hide();
@@ -71,7 +78,7 @@ void SearchContactWidget::onSearchClicked()
 void SearchContactWidget::onAddContactClicked()
 {
     QJsonObject obj;
-    obj["user_id"] = Client::getInstance().usernameId;
+    obj["user_id"] = Client::getInstance().userId;
     obj["contact_id"] = foundUserId;
     Client::getInstance().SendHttp("POST", "/contacts/add", obj);
 }
@@ -82,6 +89,10 @@ void SearchContactWidget::onSearchSuccess(QJsonObject json)
     errorLabel->hide();
     addContactButton->show();
     foundUserId = json["id"].toInt();
+    if(foundUserId == Client::getInstance().userId){
+        onSearchError("Нельзя добавить самого себя");
+        return;
+    }
     usernameUser->setText(json["username"].toString());
     emailUser->setText(json["email"].toString());
 }

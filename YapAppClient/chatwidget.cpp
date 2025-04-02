@@ -87,10 +87,24 @@ ChatWidget::ChatWidget(QWidget *parent)
     setLayout(mainLayout);
     setMinimumSize(700, 500);
 
-    connect(sendButton, &QPushButton::clicked, this, &ChatWidget::onSendClicked);
-    connect(refreshButton, &QPushButton::clicked, this, &ChatWidget::onRefreshClicked);
-    connect(searchButton, &QPushButton::clicked, this, &ChatWidget::onSearchClicked);
-    connect(messageInput, &QLineEdit::returnPressed, this, &ChatWidget::onSendClicked);
+    connect(sendButton, &QPushButton::clicked,
+            this, &ChatWidget::onSendClicked);
+    connect(refreshButton, &QPushButton::clicked,
+            this, &ChatWidget::onRefreshClicked);
+    connect(searchButton, &QPushButton::clicked,
+            this, &ChatWidget::onSearchClicked);
+    connect(messageInput, &QLineEdit::returnPressed,
+            this, &ChatWidget::onSendClicked);
+    connect(&Client::getInstance(), &Client::OnContactAdded,
+            this, &ChatWidget::onContactAdded);
+    connect(&Client::getInstance(), &Client::OnContactsReceived,
+            this, &ChatWidget::onContactsReceived);
+}
+
+void ChatWidget::showEvent(QShowEvent* event)
+{
+    QWidget::showEvent(event); // обязательно вызываем базовый метод
+    onRefreshClicked();        // вызываем нужную функцию
 }
 
 void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& time)
@@ -174,10 +188,28 @@ void ChatWidget::onSendClicked()
 
 void ChatWidget::onRefreshClicked()
 {
-    qDebug() << "Обновление контактов и сообщений...";
+    QJsonObject obj;
+    obj["user_id"] = Client::getInstance().userId;
+    Client::getInstance().SendHttp("POST", "/contacts/get", obj);
 }
 
 void ChatWidget::onSearchClicked()
 {
     searchWidget->show();
+}
+
+void ChatWidget::onContactsReceived(QJsonArray contacts)
+{
+    contactList->clear();
+    for (const QJsonValue &value : contacts) {
+        QJsonObject contact = value.toObject();
+        QString name = contact["name"].toString();
+        QString lastMessage = contact["last_message"].toString();
+        addContact(name, lastMessage);
+    }
+}
+
+void ChatWidget::onContactAdded()
+{
+    onRefreshClicked();
 }

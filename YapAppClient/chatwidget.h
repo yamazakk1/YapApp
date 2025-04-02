@@ -27,12 +27,14 @@ public:
     void addContact(const QString& name, const QString& lastMessage);
     void setActiveUser(const QString& username);
     void addMessageBubble(const QString& text, bool isOwn, const QTime& time);
-
+protected:
+    void showEvent(QShowEvent* event) override;
 private slots:
     void onSendClicked();
     void onRefreshClicked();
     void onSearchClicked();
-
+    void onContactsReceived(QJsonArray contacts);
+    void onContactAdded();
 private:
     QListWidget* contactList;
     QPushButton* searchButton;

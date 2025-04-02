@@ -14,7 +14,8 @@ class SearchContactWidget : public QWidget
      Q_OBJECT
 public:
     explicit SearchContactWidget(QWidget *parent = nullptr);
-
+protected:
+    void showEvent(QShowEvent* event) override;
 private slots:
     void onSearchClicked();
     void onAddContactClicked();

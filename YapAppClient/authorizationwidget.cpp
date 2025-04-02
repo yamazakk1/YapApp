@@ -76,7 +76,7 @@ void AuthorizationWidget::onLoginSuccess(QJsonObject user)
     statusLabel->setStyleSheet("color: green");
     statusLabel->setText("Вход успешен!");
     Client::getInstance().username = user["username"].toString();
-    Client::getInstance().usernameId = user["id"].toInt();
+    Client::getInstance().userId = user["id"].toInt();
     Client::getInstance().token = user["token"].toString();
     WidgetManager::getInstance().showWidget("chat");
 }

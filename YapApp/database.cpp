@@ -223,8 +223,10 @@ QJsonArray DatabaseManager::getUserContacts(int userId) {
         "(sender_id = u.id AND receiver_id = :user) "
         "ORDER BY sent_at DESC LIMIT 1) AS last_message "
         "FROM users u "
-        "JOIN contacts c ON u.id = c.contact_id "
-        "WHERE c.user_id = :user"
+        "JOIN contacts c ON "
+        "( (u.id = c.contact_id AND c.user_id = :user) "
+        "OR (u.id = c.user_id AND c.contact_id = :user) )"
+        "WHERE u.id != :user "
         );
     query.bindValue(":user", userId);
 
