@@ -26,17 +26,17 @@ bool DatabaseManager::connect() {
     if (m_db.isOpen())
         return true;
     // Основные параметры
-    m_db.setHostName("localhost"); // Явно указываем IPv4
+    m_db.setHostName("localhost");
     m_db.setPort(5488);
     m_db.setDatabaseName("yapapp");
-    m_db.setUserName("postgres"); // Или yapapp_user
-    m_db.setPassword("321"); // Ваш пароль
+    m_db.setUserName("postgres");
+    m_db.setPassword("321");
 
     // Важные опции
     m_db.setConnectOptions(
         "connect_timeout=5;"
         "application_name=YapApp;"
-        "requiressl=0" // Если SSL не настроен
+        "requiressl=0"
         );
 
     if (!m_db.open()) {

@@ -26,7 +26,9 @@ signals:
     void OnConnected();
     void OnErrorConnect();
     void OnLoginSuccess(QJsonObject user);
+    void OnLoginError(QString error);
     void OnRegisterSuccess();
+    void OnRegisterError(QString error);
     void OnContactsReceived(QJsonArray contacts);
     void OnContactAdded();
     void OnMessageSent();

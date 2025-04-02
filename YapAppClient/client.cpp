@@ -96,13 +96,13 @@ void Client::onReadyRead()
             if (obj.contains("token"))
                 emit OnLoginSuccess(obj);
             else
-                emit OnErrorResponse("Ошибка авторизации.");
+                emit OnLoginError("Ошибка авторизации. Неверный логин или пароль.");
         }
         else if (type == "register") {
             if (obj.value("success").toBool())
                 emit OnRegisterSuccess();
             else
-                emit OnErrorResponse(obj.value("error").toString("Ошибка регистрации."));
+                emit OnRegisterError("Ошибка регистрации. Email или имя пользователся уже занято.");
         }
         else if (type == "contacts") {
             emit OnContactsReceived(obj.value("contacts").toArray());

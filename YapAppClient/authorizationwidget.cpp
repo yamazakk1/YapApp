@@ -46,6 +46,8 @@ AuthorizationWidget::AuthorizationWidget(QWidget *parent)
     connect(switchModeButton, &QPushButton::clicked, this, &AuthorizationWidget::switchMode);
     connect(&Client::getInstance(), &Client::OnRegisterSuccess, this, &AuthorizationWidget::onRegisterSuccess);
     connect(&Client::getInstance(), &Client::OnLoginSuccess, this, &AuthorizationWidget::onLoginSuccess);
+    connect(&Client::getInstance(), &Client::OnLoginError, this, &AuthorizationWidget::onLoginError);
+    connect(&Client::getInstance(), &Client::OnRegisterError, this, &AuthorizationWidget::onRegisterError);
     updateForm();
 }
 
@@ -63,6 +65,12 @@ void AuthorizationWidget::onRegisterSuccess()
     statusLabel->setText("Регистрация успешна!");
 }
 
+void AuthorizationWidget::onRegisterError(QString error)
+{
+    statusLabel->setStyleSheet("color: red");
+    statusLabel->setText(error);
+}
+
 void AuthorizationWidget::onLoginSuccess(QJsonObject user)
 {
     statusLabel->setStyleSheet("color: green");
@@ -71,6 +79,12 @@ void AuthorizationWidget::onLoginSuccess(QJsonObject user)
     Client::getInstance().usernameId = user["id"].toInt();
     Client::getInstance().token = user["token"].toString();
     WidgetManager::getInstance().showWidget("chat");
+}
+
+void AuthorizationWidget::onLoginError(QString error)
+{
+    statusLabel->setStyleSheet("color: red");
+    statusLabel->setText(error);
 }
 
 void AuthorizationWidget::updateForm() {

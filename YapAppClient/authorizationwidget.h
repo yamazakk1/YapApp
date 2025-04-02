@@ -19,7 +19,9 @@ private slots:
     void handleButtonAuthAction();
     void switchMode();
     void onRegisterSuccess();
+    void onRegisterError(QString error);
     void onLoginSuccess(QJsonObject user);
+    void onLoginError(QString error);
 private:
     void updateForm();
 
