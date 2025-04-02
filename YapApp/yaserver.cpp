@@ -80,7 +80,7 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
         if (json.isObject()) {
             QJsonObject obj = json.object();
             QJsonObject user = db.authenticateUser(
-                obj["username"].toString(),
+                obj["email"].toString(),
                 obj["password"].toString()
                 );
 
@@ -145,6 +145,34 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
             QJsonObject responseObj;
             responseObj["type"] = "messages";
             responseObj["messages"] = messages;
+            body = QJsonDocument(responseObj).toJson();
+        }
+    }
+    else if (request.path == "/users/get")
+    {
+        if (json.isObject()) {
+            QJsonObject obj = json.object();
+
+            QJsonObject user;
+            if(obj.contains("username")){
+                user = db.getUserByUsername(obj["username"].toString());
+            }
+            if(obj.contains("id")){
+                user = db.getUserById(obj["id"].toInt());
+            }
+            QJsonObject responseObj;
+            responseObj["type"] = "user_search";
+            if(!user.isEmpty())
+            {
+                responseObj["success"] = true;
+                responseObj["id"] = user.value("id").toInt();
+                responseObj["username"] = user.value("username").toString();
+                responseObj["email"] = user.value("email").toString();
+            }
+            else
+            {
+                responseObj["success"] = false;
+            }
             body = QJsonDocument(responseObj).toJson();
         }
     }

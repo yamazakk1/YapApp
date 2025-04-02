@@ -3,17 +3,18 @@
 
 #include <QWidget>
 
-#include<QListWidget>
-#include<QPushButton>
-#include<QLineEdit>
-#include<QScrollArea>
-#include<QVBoxLayout>
-#include<QSplitter>
-#include<QScrollBar>
-#include<QTime>
+#include <QListWidget>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QScrollArea>
+#include <QVBoxLayout>
+#include <QSplitter>
+#include <QScrollBar>
+#include <QTime>
 #include <QtMath>
-#include<QTimer>
-#include<QLabel>
+#include <QTimer>
+#include <QLabel>
+#include <searchcontactwidget.h>
 
 
 class ChatWidget : public QWidget
@@ -45,6 +46,7 @@ private:
 
     QLineEdit* messageInput;
     QPushButton* sendButton;
+    SearchContactWidget* searchWidget;
 };
 
 

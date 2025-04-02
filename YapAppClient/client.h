@@ -29,8 +29,11 @@ signals:
     void OnLoginError(QString error);
     void OnRegisterSuccess();
     void OnRegisterError(QString error);
+    void OnUserSearchSuccess(QJsonObject user);
+    void OnUserSearchError(QString error);
     void OnContactsReceived(QJsonArray contacts);
     void OnContactAdded();
+    void OnContactAddError(QString error);
     void OnMessageSent();
     void OnMessagesReceived(QJsonArray messages);
     void OnErrorResponse(QString message);

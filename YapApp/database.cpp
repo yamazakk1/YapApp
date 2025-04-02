@@ -101,12 +101,12 @@ bool DatabaseManager::registerUser(const QString &username, const QString &passw
     return query.exec();
 }
 
-QJsonObject DatabaseManager::authenticateUser(const QString &username, const QString &password)
+QJsonObject DatabaseManager::authenticateUser(const QString &email, const QString &password)
 {
     QSqlQuery query(m_db);
     query.prepare("SELECT id, username, email FROM users "
-                  "WHERE username = :username AND password_hash = :password");
-    query.bindValue(":username", username);
+                  "WHERE email = :email AND password_hash = :password");
+    query.bindValue(":email", email);
     query.bindValue(":password", hashPassword(password));
 
     if (!query.exec() || !query.next()) {

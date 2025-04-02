@@ -13,6 +13,7 @@
 ChatWidget::ChatWidget(QWidget *parent)
     : QWidget(parent)
 {
+    searchWidget = new SearchContactWidget(parent);
     // ----- Контакты -----
     contactList = new QListWidget();
     refreshButton = new QPushButton("Обновить");
@@ -90,16 +91,6 @@ ChatWidget::ChatWidget(QWidget *parent)
     connect(refreshButton, &QPushButton::clicked, this, &ChatWidget::onRefreshClicked);
     connect(searchButton, &QPushButton::clicked, this, &ChatWidget::onSearchClicked);
     connect(messageInput, &QLineEdit::returnPressed, this, &ChatWidget::onSendClicked);
-
-    for (int i = 0; i < 100; ++i) {
-        addContact("Анна", "Привет!");
-        addContact("Боб", "Ты где?");
-    }
-
-    setActiveUser("Анна");
-    addMessageBubble("Привет!", false, QTime::currentTime());
-    addMessageBubble("Привет, Анна!", true, QTime::currentTime());
-
 }
 
 void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& time)
@@ -188,5 +179,5 @@ void ChatWidget::onRefreshClicked()
 
 void ChatWidget::onSearchClicked()
 {
-    qDebug() << "[TODO] Открыть окно поиска контактов";
+    searchWidget->show();
 }

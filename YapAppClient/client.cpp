@@ -111,7 +111,7 @@ void Client::onReadyRead()
             if (obj.value("success").toBool())
                 emit OnContactAdded();
             else
-                emit OnErrorResponse("Не удалось добавить контакт.");
+                emit OnContactAddError("Не удалось добавить контакт.");
         }
         else if (type == "messages") {
             emit OnMessagesReceived(obj.value("messages").toArray());
@@ -121,6 +121,12 @@ void Client::onReadyRead()
                 emit OnMessageSent();
             else
                 emit OnErrorResponse("Ошибка при отправке сообщения.");
+        }
+        else if (type == "user_search") {
+            if (obj.value("success").toBool())
+                emit OnUserSearchSuccess(obj);
+            else
+                emit OnUserSearchError("Пользователь не найден");
         }
         else {
             emit OnErrorResponse("Неизвестный тип ответа: " + type);

@@ -15,6 +15,7 @@ SOURCES += \
     httpresponse.cpp \
     main.cpp \
     connectwidget.cpp \
+    searchcontactwidget.cpp \
     widgetmanager.cpp
 
 HEADERS += \
@@ -23,6 +24,7 @@ HEADERS += \
     client.h \
     connectwidget.h \
     httpresponse.h \
+    searchcontactwidget.h \
     widgetmanager.h
 
 FORMS += \
