@@ -27,10 +27,17 @@ void YaHttpServer::incomingConnection(qintptr socketDescriptor)
 
             // Получаем Content-Length
             int contentLength = 0;
+            bool hasContentLength = false;
+
             for (const QByteArray& line : lines) {
                 if (line.toLower().startsWith("content-length:")) {
                     contentLength = line.mid(QString("content-length:").length()).trimmed().toInt();
+                    hasContentLength = true;
                 }
+            }
+
+            if (!hasContentLength) {
+                contentLength = 0;
             }
 
             int totalRequestLength = headerEndIndex + 4 + contentLength;

@@ -17,19 +17,20 @@ void Client::Connect(QString ip, int port)
     m_port = port;
 }
 
-void Client::SendHttp(const QString metodeName, const QString url,  QJsonObject json) const
+void Client::SendHttp(const QString metodeName, const QString url, const QJsonObject* json) const
 {
     QString message = QString("%1 %2 HTTP/1.1\r\nHost: %3\r\n").arg(metodeName, url, m_ip);
     message.append("Connection: keep-alive\r\n");
-    message.append("Content-Type: application/json\r\n");
-    if (!json.isEmpty()) {
-        QJsonDocument doc(json);
+
+    if (json && !json->isEmpty()) {
+        message.append("Content-Type: application/json\r\n");
+        QJsonDocument doc(*json);
         QByteArray jsonData = doc.toJson(QJsonDocument::Compact);
         message.append(QString("Content-Length: %1\r\n").arg(jsonData.size()));
         message.append("\r\n");
         message.append(QString::fromUtf8(jsonData));
-    } else {
-        message.append("Content-Length: 0\r\n");
+    }
+    else {
         message.append("\r\n");
     }
     m_socket->write(message.toUtf8());

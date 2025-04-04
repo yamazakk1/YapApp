@@ -146,9 +146,9 @@ void AuthorizationWidget::handleButtonAuthAction() {
     respose["password"] = passwordEdit->text();
     respose["email"] = emailEdit->text();
     if (isLoginMode) {
-        Client::getInstance().SendHttp("POST", "/login", respose);
+        Client::getInstance().SendHttp("POST", "/login", &respose);
 
     } else {
-        Client::getInstance().SendHttp("POST", "/register", respose);
+        Client::getInstance().SendHttp("POST", "/register", &respose);
     }
 }

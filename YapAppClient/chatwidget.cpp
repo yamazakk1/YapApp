@@ -175,10 +175,12 @@ void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& 
 void ChatWidget::getMessagesFromUser(const int userId)
 {
     currentUserIdChat = userId;
-    QJsonObject obj;
-    obj["user1_id"] = Client::getInstance().userId;
-    obj["user2_id"] = userId;
-    Client::getInstance().SendHttp("POST", "/messages/get", obj);
+    Client::getInstance().SendHttp(
+        "GET",
+        QString("/messages?user1_id=%1&user2_id=%2")
+            .arg(Client::getInstance().userId)
+            .arg(userId)
+        );
 }
 
 
@@ -205,16 +207,18 @@ void ChatWidget::onSendClicked()
         obj["sender_id"] = Client::getInstance().userId;
         obj["receiver_id"] = currentUserIdChat;
         obj["content"] = text;
-        Client::getInstance().SendHttp("POST", "/messages/send", obj);
+        Client::getInstance().SendHttp("POST", "/messages", &obj);
         messageInput->clear();
     }
 }
 
 void ChatWidget::onRefreshClicked()
 {
-    QJsonObject obj;
-    obj["user_id"] = Client::getInstance().userId;
-    Client::getInstance().SendHttp("POST", "/contacts/get", obj);
+    Client::getInstance().SendHttp(
+        "GET",
+        QString("/contacts?user_id=%1")
+            .arg(Client::getInstance().userId)
+        );
     if(currentUserIdChat != -1)
     {
         getMessagesFromUser(currentUserIdChat);

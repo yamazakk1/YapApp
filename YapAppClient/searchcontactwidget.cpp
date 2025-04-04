@@ -70,9 +70,11 @@ void SearchContactWidget::onSearchClicked()
     foundUserContainer->hide();
     addContactButton->hide();
     errorLabel->hide();
-    QJsonObject obj;
-    obj["username"] = searchInput->text();
-    Client::getInstance().SendHttp("POST", "/users/get", obj);
+
+    Client::getInstance().SendHttp(
+        "GET",
+        QString("/users?username=%1").arg(searchInput->text())
+        );
 }
 
 void SearchContactWidget::onAddContactClicked()
@@ -80,7 +82,7 @@ void SearchContactWidget::onAddContactClicked()
     QJsonObject obj;
     obj["user_id"] = Client::getInstance().userId;
     obj["contact_id"] = foundUserId;
-    Client::getInstance().SendHttp("POST", "/contacts/add", obj);
+    Client::getInstance().SendHttp("POST", "/contacts", &obj);
 }
 
 void SearchContactWidget::onSearchSuccess(QJsonObject json)

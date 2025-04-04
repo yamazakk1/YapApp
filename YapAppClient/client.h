@@ -17,7 +17,7 @@ public:
     Client& operator=(const Client&) = delete;
 
     void Connect(QString ip, int port);
-    void SendHttp(const QString metodeName, const QString url, const QJsonObject json) const;
+    void SendHttp(const QString metodeName, const QString url, const QJsonObject* json = nullptr) const;
 
     QString username;
     QString token;
