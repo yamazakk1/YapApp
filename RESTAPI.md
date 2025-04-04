@@ -1,5 +1,5 @@
 
-# YAChat REST API
+# YapApp REST API
 
 ## 📖 Описание
 
