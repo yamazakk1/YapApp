@@ -1,0 +1,30 @@
+\doxysection{httprequest.\+h}
+\hypertarget{httprequest_8h_source}{}\label{httprequest_8h_source}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ HTTPREQUEST\_H}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ HTTPREQUEST\_H}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ <QString>}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ <QMap>}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00018\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_http_request}{HttpRequest}}}
+\DoxyCodeLine{00019\ \{}
+\DoxyCodeLine{00020\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00021\ \ \ \ \ QString\ \mbox{\hyperlink{class_http_request_a582879b54bca44ce4d6a7413f03ad95b}{method}};\ \ \ \ \ \ }
+\DoxyCodeLine{00022\ \ \ \ \ QString\ \mbox{\hyperlink{class_http_request_aa67a067141184695df61f3db9b07ca76}{path}};\ \ \ \ \ \ \ }
+\DoxyCodeLine{00023\ \ \ \ \ QMap<QString,\ QString>\ \mbox{\hyperlink{class_http_request_aae0d21d006655c2e206b2417bcbfca78}{headers}};\ \ \ \ \ }
+\DoxyCodeLine{00024\ \ \ \ \ QMap<QString,\ QString>\ \mbox{\hyperlink{class_http_request_ab2b0412188c3d3baf90598de7489d345}{queryParams}};\ }
+\DoxyCodeLine{00025\ \ \ \ \ QByteArray\ \mbox{\hyperlink{class_http_request_a7b1e70e05f55cb477134b55766e103cc}{body}};\ \ \ \ \ }
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_http_request_a962e1ce65ef7b09609c7df89516567a1}{valid}}\ =\ \textcolor{keyword}{true};\ \ \ }
+\DoxyCodeLine{00027\ }
+\DoxyCodeLine{00038\ \ \ \ \ QString\ \mbox{\hyperlink{class_http_request_af590e0861647a28195c9f6848eb0608a}{header}}(\textcolor{keyword}{const}\ QString\&\ name)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00045\ \ \ \ \ QString\ \mbox{\hyperlink{class_http_request_ac319156abd67abd1877a59fa14248fab}{query}}(\textcolor{keyword}{const}\ QString\&\ name)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00046\ }
+\DoxyCodeLine{00051\ \ \ \ \ \textcolor{keywordtype}{bool}\ \mbox{\hyperlink{class_http_request_a1c9b12924e92a83aee5f294478681fa6}{isValid}}()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00069\ \ \ \ \ \textcolor{keyword}{static}\ \mbox{\hyperlink{class_http_request}{HttpRequest}}\ \mbox{\hyperlink{class_http_request_aab1e8a93965411d4c80784f3acb653e3}{parse}}(\textcolor{keyword}{const}\ QByteArray\&\ rawRequest);}
+\DoxyCodeLine{00070\ \};}
+\DoxyCodeLine{00071\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ HTTPREQUEST\_H}}
+
+\end{DoxyCode}

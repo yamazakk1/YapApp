@@ -1,0 +1,158 @@
+\doxysection{Ya\+Http\+Server Class Reference}
+\hypertarget{class_ya_http_server}{}\label{class_ya_http_server}\index{YaHttpServer@{YaHttpServer}}
+
+
+TCP-\/сервер с HTTP-\/обработчиком входящих соединений  
+
+
+
+
+{\ttfamily \#include $<$yahttpserver.\+h$>$}
+
+Inheritance diagram for Ya\+Http\+Server\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_ya_http_server}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Signals}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_ya_http_server_a1fa03900ccab50b59e8192a3a901a50c}{new\+Request}} (QTcp\+Socket \&socket, \mbox{\hyperlink{class_http_request}{Http\+Request}} \&request)
+\begin{DoxyCompactList}\small\item\em Сигнал нового HTTP-\/запроса \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_ya_http_server_a885943f74ad3150c7e0cf713008bff7a}{disconnect}} (QTcp\+Socket \&socket)
+\begin{DoxyCompactList}\small\item\em Сигнал отключения клиента \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_ya_http_server_ae58db031020148ffaa82ffc6a9cac4c2}{Ya\+Http\+Server}} (QObject \texorpdfstring{$\ast$}{*}parent=nullptr)
+\begin{DoxyCompactList}\small\item\em Конструктор HTTP-\/сервера \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static QString \mbox{\hyperlink{class_ya_http_server_a34fe697ff75b5e310679226795be8191}{generate\+Token}} ()
+\begin{DoxyCompactList}\small\item\em Генерирует уникальный токен сессии \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_ya_http_server_a788a65b85fd8f295e4d7f58c81f0a45b}{incoming\+Connection}} (qintptr socket\+Descriptor) override
+\begin{DoxyCompactList}\small\item\em Обработчик новых TCP-\/соединений (переопределение QTcp\+Server) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+TCP-\/сервер с HTTP-\/обработчиком входящих соединений 
+
+Наследует QTcp\+Server и добавляет функциональность\+:
+\begin{DoxyItemize}
+\item Автоматический парсинг HTTP-\/запросов
+\item Генерацию уникальных токенов для сессий
+\item Сигнальную систему для обработки событий
+\end{DoxyItemize}
+
+\begin{DoxyNote}{Note}
+Для использования создайте экземпляр и подключите сигналы к слотам обработчиков 
+\end{DoxyNote}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_ya_http_server_ae58db031020148ffaa82ffc6a9cac4c2}\index{YaHttpServer@{YaHttpServer}!YaHttpServer@{YaHttpServer}}
+\index{YaHttpServer@{YaHttpServer}!YaHttpServer@{YaHttpServer}}
+\doxysubsubsection{\texorpdfstring{YaHttpServer()}{YaHttpServer()}}
+{\footnotesize\ttfamily \label{class_ya_http_server_ae58db031020148ffaa82ffc6a9cac4c2} 
+Ya\+Http\+Server\+::\+Ya\+Http\+Server (\begin{DoxyParamCaption}\item[{QObject \texorpdfstring{$\ast$}{*}}]{parent}{ = {\ttfamily nullptr}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+
+
+Конструктор HTTP-\/сервера 
+
+
+\begin{DoxyParams}{Parameters}
+{\em parent} & Родительский QObject (для управления памятью) \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_ya_http_server_a885943f74ad3150c7e0cf713008bff7a}\index{YaHttpServer@{YaHttpServer}!disconnect@{disconnect}}
+\index{disconnect@{disconnect}!YaHttpServer@{YaHttpServer}}
+\doxysubsubsection{\texorpdfstring{disconnect}{disconnect}}
+{\footnotesize\ttfamily \label{class_ya_http_server_a885943f74ad3150c7e0cf713008bff7a} 
+void Ya\+Http\+Server\+::disconnect (\begin{DoxyParamCaption}\item[{QTcp\+Socket \&}]{socket}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+
+
+Сигнал отключения клиента 
+
+
+\begin{DoxyParams}{Parameters}
+{\em socket} & Ссылка на сокет отключившегося клиента\\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+Не используйте сокет после этого сигнала! 
+\end{DoxyWarning}
+\Hypertarget{class_ya_http_server_a34fe697ff75b5e310679226795be8191}\index{YaHttpServer@{YaHttpServer}!generateToken@{generateToken}}
+\index{generateToken@{generateToken}!YaHttpServer@{YaHttpServer}}
+\doxysubsubsection{\texorpdfstring{generateToken()}{generateToken()}}
+{\footnotesize\ttfamily \label{class_ya_http_server_a34fe697ff75b5e310679226795be8191} 
+QString Ya\+Http\+Server\+::generate\+Token (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Генерирует уникальный токен сессии 
+
+\begin{DoxyReturn}{Returns}
+32-\/байтовый hex-\/токен в формате QString
+\end{DoxyReturn}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{QString\ token\ =\ \mbox{\hyperlink{class_ya_http_server_a34fe697ff75b5e310679226795be8191}{YaHttpServer::generateToken}}();}
+\DoxyCodeLine{qDebug()\ <<\ \textcolor{stringliteral}{"{}Session\ token:"{}}\ <<\ token;}
+
+\end{DoxyCode}
+
+
+\begin{DoxyWarning}{Warning}
+Не криптографически безопасен! Только для идентификации сессий. 
+\end{DoxyWarning}
+\Hypertarget{class_ya_http_server_a788a65b85fd8f295e4d7f58c81f0a45b}\index{YaHttpServer@{YaHttpServer}!incomingConnection@{incomingConnection}}
+\index{incomingConnection@{incomingConnection}!YaHttpServer@{YaHttpServer}}
+\doxysubsubsection{\texorpdfstring{incomingConnection()}{incomingConnection()}}
+{\footnotesize\ttfamily \label{class_ya_http_server_a788a65b85fd8f295e4d7f58c81f0a45b} 
+void Ya\+Http\+Server\+::incoming\+Connection (\begin{DoxyParamCaption}\item[{qintptr}]{socket\+Descriptor}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}}
+
+
+
+Обработчик новых TCP-\/соединений (переопределение QTcp\+Server) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em socket\+Descriptor} & Дескриптор входящего сокета \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_ya_http_server_a1fa03900ccab50b59e8192a3a901a50c}\index{YaHttpServer@{YaHttpServer}!newRequest@{newRequest}}
+\index{newRequest@{newRequest}!YaHttpServer@{YaHttpServer}}
+\doxysubsubsection{\texorpdfstring{newRequest}{newRequest}}
+{\footnotesize\ttfamily \label{class_ya_http_server_a1fa03900ccab50b59e8192a3a901a50c} 
+void Ya\+Http\+Server\+::new\+Request (\begin{DoxyParamCaption}\item[{QTcp\+Socket \&}]{socket}{, }\item[{\mbox{\hyperlink{class_http_request}{Http\+Request}} \&}]{request}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [signal]}}
+
+
+
+Сигнал нового HTTP-\/запроса 
+
+
+\begin{DoxyParams}{Parameters}
+{\em socket} & Ссылка на сокет клиента \\
+\hline
+{\em request} & Распарсенный HTTP-\/запрос (метод, заголовки, тело)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Сокет остается открытым -\/ необходимо самостоятельно отправлять ответ 
+\end{DoxyNote}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+yahttpserver.\+h\item 
+yahttpserver.\+cpp\end{DoxyCompactItemize}

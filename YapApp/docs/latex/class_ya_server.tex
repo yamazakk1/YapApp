@@ -1,0 +1,99 @@
+\doxysection{Ya\+Server Class Reference}
+\hypertarget{class_ya_server}{}\label{class_ya_server}\index{YaServer@{YaServer}}
+
+
+Singleton-\/класс HTTP-\/сервера для обработки входящих запросов.  
+
+
+
+
+{\ttfamily \#include $<$yaserver.\+h$>$}
+
+Inheritance diagram for Ya\+Server\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_ya_server}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{class_ya_server_ab1eb91646133987b866a88d0e2804d23}{start\+Server}} (int port)
+\begin{DoxyCompactList}\small\item\em Запускает сервер на указанном порту \end{DoxyCompactList}\item 
+\Hypertarget{class_ya_server_a0dc363dff501ae69c607870d554222f0}\label{class_ya_server_a0dc363dff501ae69c607870d554222f0} 
+{\bfseries Ya\+Server} (const \mbox{\hyperlink{class_ya_server}{Ya\+Server}} \&)=delete
+\begin{DoxyCompactList}\small\item\em Запрет копирования \end{DoxyCompactList}\item 
+\Hypertarget{class_ya_server_ac5728f7bd48382f187562dfb6f991258}\label{class_ya_server_ac5728f7bd48382f187562dfb6f991258} 
+\mbox{\hyperlink{class_ya_server}{Ya\+Server}} \& {\bfseries operator=} (const \mbox{\hyperlink{class_ya_server}{Ya\+Server}} \&)=delete
+\begin{DoxyCompactList}\small\item\em Запрет присваивания \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{class_ya_server}{Ya\+Server}} \& \mbox{\hyperlink{class_ya_server_ad36a71bd2f99d9a124339c6f7995ef5d}{get\+Instance}} ()
+\begin{DoxyCompactList}\small\item\em Получает единственный экземпляр класса \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Singleton-\/класс HTTP-\/сервера для обработки входящих запросов. 
+
+Класс реализует TCP-\/сервер с HTTP-\/интерфейсом. Поддерживает\+:
+\begin{DoxyItemize}
+\item Обработку входящих соединений
+\item Парсинг HTTP-\/запросов
+\item Управление жизненным циклом соединений
+\end{DoxyItemize}
+
+\begin{DoxyWarning}{Warning}
+Класс является singleton. Для доступа используйте \doxylink{class_ya_server_ad36a71bd2f99d9a124339c6f7995ef5d}{get\+Instance()}. 
+\end{DoxyWarning}
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_ya_http_server}{Ya\+Http\+Server} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_ya_server_ad36a71bd2f99d9a124339c6f7995ef5d}\index{YaServer@{YaServer}!getInstance@{getInstance}}
+\index{getInstance@{getInstance}!YaServer@{YaServer}}
+\doxysubsubsection{\texorpdfstring{getInstance()}{getInstance()}}
+{\footnotesize\ttfamily \label{class_ya_server_ad36a71bd2f99d9a124339c6f7995ef5d} 
+\mbox{\hyperlink{class_ya_server}{Ya\+Server}} \& Ya\+Server\+::get\+Instance (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Получает единственный экземпляр класса 
+
+\begin{DoxyReturn}{Returns}
+Ссылка на экземпляр \doxylink{class_ya_server}{Ya\+Server}
+\end{DoxyReturn}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\textcolor{keyword}{auto}\&\ server\ =\ \mbox{\hyperlink{class_ya_server_ad36a71bd2f99d9a124339c6f7995ef5d}{YaServer::getInstance}}();}
+\DoxyCodeLine{server.startServer(8080);}
+
+\end{DoxyCode}
+ \Hypertarget{class_ya_server_ab1eb91646133987b866a88d0e2804d23}\index{YaServer@{YaServer}!startServer@{startServer}}
+\index{startServer@{startServer}!YaServer@{YaServer}}
+\doxysubsubsection{\texorpdfstring{startServer()}{startServer()}}
+{\footnotesize\ttfamily \label{class_ya_server_ab1eb91646133987b866a88d0e2804d23} 
+void Ya\+Server\+::start\+Server (\begin{DoxyParamCaption}\item[{int}]{port}{}\end{DoxyParamCaption})}
+
+
+
+Запускает сервер на указанном порту 
+
+
+\begin{DoxyParams}{Parameters}
+{\em port} & Порт для прослушивания (1-\/65535) \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::runtime\+\_\+error} & Если сервер не может стартовать \\
+\hline
+\end{DoxyExceptions}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+yaserver.\+h\item 
+yaserver.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,158 @@
+\doxysection{Http\+Request Class Reference}
+\hypertarget{class_http_request}{}\label{class_http_request}\index{HttpRequest@{HttpRequest}}
+
+
+Класс для представления и обработки HTTP-\/запросов  
+
+
+
+
+{\ttfamily \#include $<$httprequest.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+QString \mbox{\hyperlink{class_http_request_af590e0861647a28195c9f6848eb0608a}{header}} (const QString \&name) const
+\begin{DoxyCompactList}\small\item\em Получает значение заголовка по имени \end{DoxyCompactList}\item 
+QString \mbox{\hyperlink{class_http_request_ac319156abd67abd1877a59fa14248fab}{query}} (const QString \&name) const
+\begin{DoxyCompactList}\small\item\em Получает query-\/параметр по имени \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_http_request_a1c9b12924e92a83aee5f294478681fa6}{is\+Valid}} () const
+\begin{DoxyCompactList}\small\item\em Проверяет валидность запроса \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{class_http_request}{Http\+Request}} \mbox{\hyperlink{class_http_request_aab1e8a93965411d4c80784f3acb653e3}{parse}} (const QByte\+Array \&raw\+Request)
+\begin{DoxyCompactList}\small\item\em Парсит сырой HTTP-\/запрос \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_http_request_a582879b54bca44ce4d6a7413f03ad95b}\label{class_http_request_a582879b54bca44ce4d6a7413f03ad95b} 
+QString {\bfseries method}
+\begin{DoxyCompactList}\small\item\em HTTP-\/метод в верхнем регистре (например, "{}\+GET"{}, "{}\+POST"{}) \end{DoxyCompactList}\item 
+\Hypertarget{class_http_request_aa67a067141184695df61f3db9b07ca76}\label{class_http_request_aa67a067141184695df61f3db9b07ca76} 
+QString {\bfseries path}
+\begin{DoxyCompactList}\small\item\em Путь запроса без query-\/параметров (например, "{}/api/users"{}) \end{DoxyCompactList}\item 
+\Hypertarget{class_http_request_aae0d21d006655c2e206b2417bcbfca78}\label{class_http_request_aae0d21d006655c2e206b2417bcbfca78} 
+QMap$<$ QString, QString $>$ {\bfseries headers}
+\begin{DoxyCompactList}\small\item\em Заголовки запроса (ключ в нижнем регистре) \end{DoxyCompactList}\item 
+\Hypertarget{class_http_request_ab2b0412188c3d3baf90598de7489d345}\label{class_http_request_ab2b0412188c3d3baf90598de7489d345} 
+QMap$<$ QString, QString $>$ {\bfseries query\+Params}
+\begin{DoxyCompactList}\small\item\em Параметры URL (после \textquotesingle{}?\textquotesingle{}) \end{DoxyCompactList}\item 
+\Hypertarget{class_http_request_a7b1e70e05f55cb477134b55766e103cc}\label{class_http_request_a7b1e70e05f55cb477134b55766e103cc} 
+QByte\+Array {\bfseries body}
+\begin{DoxyCompactList}\small\item\em Тело запроса (для POST/\+PUT) \end{DoxyCompactList}\item 
+\Hypertarget{class_http_request_a962e1ce65ef7b09609c7df89516567a1}\label{class_http_request_a962e1ce65ef7b09609c7df89516567a1} 
+bool {\bfseries valid} = true
+\begin{DoxyCompactList}\small\item\em Флаг корректности разбора запроса \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Класс для представления и обработки HTTP-\/запросов 
+
+Содержит разобранные компоненты HTTP-\/запроса\+:
+\begin{DoxyItemize}
+\item Метод (GET/\+POST/etc)
+\item Путь
+\item Заголовки
+\item Query-\/параметры
+\item Тело запроса
+\item Статус валидности 
+\end{DoxyItemize}
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_http_request_af590e0861647a28195c9f6848eb0608a}\index{HttpRequest@{HttpRequest}!header@{header}}
+\index{header@{header}!HttpRequest@{HttpRequest}}
+\doxysubsubsection{\texorpdfstring{header()}{header()}}
+{\footnotesize\ttfamily \label{class_http_request_af590e0861647a28195c9f6848eb0608a} 
+QString Http\+Request\+::header (\begin{DoxyParamCaption}\item[{const QString \&}]{name}{}\end{DoxyParamCaption}) const}
+
+
+
+Получает значение заголовка по имени 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & Название заголовка (регистронезависимое) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Значение заголовка или пустую строку
+\end{DoxyReturn}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{HttpRequest\ request;}
+\DoxyCodeLine{QString\ contentType\ =\ request.\mbox{\hyperlink{class_http_request_af590e0861647a28195c9f6848eb0608a}{header}}(\textcolor{stringliteral}{"{}content-\/type"{}});}
+
+\end{DoxyCode}
+ \Hypertarget{class_http_request_a1c9b12924e92a83aee5f294478681fa6}\index{HttpRequest@{HttpRequest}!isValid@{isValid}}
+\index{isValid@{isValid}!HttpRequest@{HttpRequest}}
+\doxysubsubsection{\texorpdfstring{isValid()}{isValid()}}
+{\footnotesize\ttfamily \label{class_http_request_a1c9b12924e92a83aee5f294478681fa6} 
+bool Http\+Request\+::is\+Valid (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Проверяет валидность запроса 
+
+\begin{DoxyReturn}{Returns}
+true если запрос был успешно разобран 
+\end{DoxyReturn}
+\Hypertarget{class_http_request_aab1e8a93965411d4c80784f3acb653e3}\index{HttpRequest@{HttpRequest}!parse@{parse}}
+\index{parse@{parse}!HttpRequest@{HttpRequest}}
+\doxysubsubsection{\texorpdfstring{parse()}{parse()}}
+{\footnotesize\ttfamily \label{class_http_request_aab1e8a93965411d4c80784f3acb653e3} 
+\mbox{\hyperlink{class_http_request}{Http\+Request}} Http\+Request\+::parse (\begin{DoxyParamCaption}\item[{const QByte\+Array \&}]{raw\+Request}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Парсит сырой HTTP-\/запрос 
+
+
+\begin{DoxyParams}{Parameters}
+{\em raw\+Request} & Сырые данные запроса (как пришли от клиента) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Разобранный \doxylink{class_http_request}{Http\+Request} объект
+\end{DoxyReturn}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em std\+::runtime\+\_\+error} & при критических ошибках парсинга \\
+\hline
+\end{DoxyExceptions}
+\begin{DoxyNote}{Note}
+Устанавливает valid=false при нефатальных ошибках
+\end{DoxyNote}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{QByteArray\ data\ =\ socket-\/>readAll();}
+\DoxyCodeLine{HttpRequest\ request\ =\ \mbox{\hyperlink{class_http_request_aab1e8a93965411d4c80784f3acb653e3}{HttpRequest::parse}}(data);}
+\DoxyCodeLine{\textcolor{keywordflow}{if}\ (!request.\mbox{\hyperlink{class_http_request_a1c9b12924e92a83aee5f294478681fa6}{isValid}}())\ \{}
+\DoxyCodeLine{\ \ \ \ sendErrorResponse(400);}
+\DoxyCodeLine{\}}
+
+\end{DoxyCode}
+ \Hypertarget{class_http_request_ac319156abd67abd1877a59fa14248fab}\index{HttpRequest@{HttpRequest}!query@{query}}
+\index{query@{query}!HttpRequest@{HttpRequest}}
+\doxysubsubsection{\texorpdfstring{query()}{query()}}
+{\footnotesize\ttfamily \label{class_http_request_ac319156abd67abd1877a59fa14248fab} 
+QString Http\+Request\+::query (\begin{DoxyParamCaption}\item[{const QString \&}]{name}{}\end{DoxyParamCaption}) const}
+
+
+
+Получает query-\/параметр по имени 
+
+
+\begin{DoxyParams}{Parameters}
+{\em name} & Ключ параметра \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Значение параметра или пустую строку 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+httprequest.\+h\item 
+httprequest.\+cpp\end{DoxyCompactItemize}

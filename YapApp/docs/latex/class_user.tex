@@ -1,0 +1,182 @@
+\doxysection{User Class Reference}
+\hypertarget{class_user}{}\label{class_user}\index{User@{User}}
+
+
+Класс для хранения и управления данными пользователя  
+
+
+
+
+{\ttfamily \#include $<$user.\+h$>$}
+
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_user_a4a0137053e591fbb79d9057dd7d2283d}{User}} ()
+\begin{DoxyCompactList}\small\item\em Конструктор по умолчанию \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_user_a16d5efee6e82076e5f4cf91442680780}{User}} (QString first\+Name, QString last\+Name, QString email)
+\begin{DoxyCompactList}\small\item\em Параметризованный конструктор \end{DoxyCompactList}\item 
+QString \mbox{\hyperlink{class_user_a86d1ab75ca7c4ad813ae72b43297fb35}{get\+First\+Name}} () const
+\begin{DoxyCompactList}\small\item\em Получить имя пользователя \end{DoxyCompactList}\item 
+QString \mbox{\hyperlink{class_user_a9864f7521f7f0bf8132e2464e9df7a02}{get\+Last\+Name}} () const
+\begin{DoxyCompactList}\small\item\em Получить фамилию пользователя \end{DoxyCompactList}\item 
+QString \mbox{\hyperlink{class_user_a080b4119344d333a59d14bd5d0667797}{get\+Email}} () const
+\begin{DoxyCompactList}\small\item\em Получить электронную почту \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_user_ae5c68644d996c177e9df403c1001cf17}{set\+First\+Name}} (QString const value)
+\begin{DoxyCompactList}\small\item\em Установить имя пользователя \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_user_ae1eb7c2a1e4e201e553bf659455ca1c8}{set\+Last\+Name}} (QString const value)
+\begin{DoxyCompactList}\small\item\em Установить фамилию пользователя \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_user_a089c2c4126ed0888fb1aa715371b942c}{set\+Email}} (QString const value)
+\begin{DoxyCompactList}\small\item\em Установить электронную почту \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Класс для хранения и управления данными пользователя 
+
+Предоставляет интерфейс для работы с\+:
+\begin{DoxyItemize}
+\item Именем пользователя
+\item Фамилией
+\item Электронной почтой
+\end{DoxyItemize}
+
+\begin{DoxyNote}{Note}
+Все методы класса потокобезопасны 
+\end{DoxyNote}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_user_a4a0137053e591fbb79d9057dd7d2283d}\index{User@{User}!User@{User}}
+\index{User@{User}!User@{User}}
+\doxysubsubsection{\texorpdfstring{User()}{User()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \label{class_user_a4a0137053e591fbb79d9057dd7d2283d} 
+User\+::\+User (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Конструктор по умолчанию 
+
+Создает пользователя с пустыми полями \Hypertarget{class_user_a16d5efee6e82076e5f4cf91442680780}\index{User@{User}!User@{User}}
+\index{User@{User}!User@{User}}
+\doxysubsubsection{\texorpdfstring{User()}{User()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \label{class_user_a16d5efee6e82076e5f4cf91442680780} 
+User\+::\+User (\begin{DoxyParamCaption}\item[{QString}]{first\+Name}{, }\item[{QString}]{last\+Name}{, }\item[{QString}]{email}{}\end{DoxyParamCaption})}
+
+
+
+Параметризованный конструктор 
+
+
+\begin{DoxyParams}{Parameters}
+{\em first\+Name} & Имя пользователя \\
+\hline
+{\em last\+Name} & Фамилия пользователя \\
+\hline
+{\em email} & Электронная почта\\
+\hline
+\end{DoxyParams}
+\begin{DoxyWarning}{Warning}
+Не проверяет валидность email! Используйте дополнительную валидацию. 
+\end{DoxyWarning}
+
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_user_a080b4119344d333a59d14bd5d0667797}\index{User@{User}!getEmail@{getEmail}}
+\index{getEmail@{getEmail}!User@{User}}
+\doxysubsubsection{\texorpdfstring{getEmail()}{getEmail()}}
+{\footnotesize\ttfamily \label{class_user_a080b4119344d333a59d14bd5d0667797} 
+QString User\+::get\+Email (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Получить электронную почту 
+
+\begin{DoxyReturn}{Returns}
+Текущий email (QString) 
+\end{DoxyReturn}
+\Hypertarget{class_user_a86d1ab75ca7c4ad813ae72b43297fb35}\index{User@{User}!getFirstName@{getFirstName}}
+\index{getFirstName@{getFirstName}!User@{User}}
+\doxysubsubsection{\texorpdfstring{getFirstName()}{getFirstName()}}
+{\footnotesize\ttfamily \label{class_user_a86d1ab75ca7c4ad813ae72b43297fb35} 
+QString User\+::get\+First\+Name (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Получить имя пользователя 
+
+\begin{DoxyReturn}{Returns}
+Текущее имя (QString) 
+\end{DoxyReturn}
+\Hypertarget{class_user_a9864f7521f7f0bf8132e2464e9df7a02}\index{User@{User}!getLastName@{getLastName}}
+\index{getLastName@{getLastName}!User@{User}}
+\doxysubsubsection{\texorpdfstring{getLastName()}{getLastName()}}
+{\footnotesize\ttfamily \label{class_user_a9864f7521f7f0bf8132e2464e9df7a02} 
+QString User\+::get\+Last\+Name (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const}
+
+
+
+Получить фамилию пользователя 
+
+\begin{DoxyReturn}{Returns}
+Текущая фамилия (QString) 
+\end{DoxyReturn}
+\Hypertarget{class_user_a089c2c4126ed0888fb1aa715371b942c}\index{User@{User}!setEmail@{setEmail}}
+\index{setEmail@{setEmail}!User@{User}}
+\doxysubsubsection{\texorpdfstring{setEmail()}{setEmail()}}
+{\footnotesize\ttfamily \label{class_user_a089c2c4126ed0888fb1aa715371b942c} 
+void User\+::set\+Email (\begin{DoxyParamCaption}\item[{QString const}]{value}{}\end{DoxyParamCaption})}
+
+
+
+Установить электронную почту 
+
+
+\begin{DoxyParams}{Parameters}
+{\em value} & Новый email\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Автоматически триммирует пробельные символы 
+\end{DoxyNote}
+\Hypertarget{class_user_ae5c68644d996c177e9df403c1001cf17}\index{User@{User}!setFirstName@{setFirstName}}
+\index{setFirstName@{setFirstName}!User@{User}}
+\doxysubsubsection{\texorpdfstring{setFirstName()}{setFirstName()}}
+{\footnotesize\ttfamily \label{class_user_ae5c68644d996c177e9df403c1001cf17} 
+void User\+::set\+First\+Name (\begin{DoxyParamCaption}\item[{QString const}]{value}{}\end{DoxyParamCaption})}
+
+
+
+Установить имя пользователя 
+
+
+\begin{DoxyParams}{Parameters}
+{\em value} & Новое имя\\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{class_user_a4a0137053e591fbb79d9057dd7d2283d}{User}}\ user;}
+\DoxyCodeLine{user.\mbox{\hyperlink{class_user_ae5c68644d996c177e9df403c1001cf17}{setFirstName}}(\textcolor{stringliteral}{"{}Иван"{}});}
+
+\end{DoxyCode}
+ \Hypertarget{class_user_ae1eb7c2a1e4e201e553bf659455ca1c8}\index{User@{User}!setLastName@{setLastName}}
+\index{setLastName@{setLastName}!User@{User}}
+\doxysubsubsection{\texorpdfstring{setLastName()}{setLastName()}}
+{\footnotesize\ttfamily \label{class_user_ae1eb7c2a1e4e201e553bf659455ca1c8} 
+void User\+::set\+Last\+Name (\begin{DoxyParamCaption}\item[{QString const}]{value}{}\end{DoxyParamCaption})}
+
+
+
+Установить фамилию пользователя 
+
+
+\begin{DoxyParams}{Parameters}
+{\em value} & Новая фамилия \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+user.\+h\item 
+user.\+cpp\end{DoxyCompactItemize}
