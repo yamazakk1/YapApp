@@ -79,6 +79,15 @@ public:
     QJsonObject getUserById(int userId);
 
     /**
+     * @brief Записывает мета данные для файла
+     * @param user1 ID первого пользователя
+     * @param user2 ID второго пользователя
+     * @param fileName название и расширение файла
+     * @return QJsonObject с id файла для доступа
+     */
+    QJsonObject setFileMeta(int user1, int user2, const QString &fileName);
+
+    /**
      * @brief Получает данные пользователя по логину
      * @param username Логин пользователя
      * @return QJsonObject с данными пользователя

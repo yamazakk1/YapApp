@@ -68,8 +68,10 @@ void DatabaseManager::initDatabaseSchema() {
                "receiver_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
                "content TEXT NOT NULL, "
                "sent_at TIMESTAMPTZ DEFAULT NOW(), "
-               "is_read BOOLEAN DEFAULT FALSE"
+               "is_read BOOLEAN DEFAULT FALSE, "
+               "is_file BOOLEAN DEFAULT FALSE"
                ")");
+
     // Contacts table
     query.exec("CREATE TABLE IF NOT EXISTS contacts ("
                "user_id INTEGER REFERENCES users(id) ON DELETE CASCADE, "
@@ -124,12 +126,13 @@ QJsonObject DatabaseManager::authenticateUser(const QString &email, const QStrin
 bool DatabaseManager::sendMessage(int senderId, int receiverId, const QString &content)
 {
     QSqlQuery query(m_db);
-    query.prepare("INSERT INTO messages (sender_id, receiver_id, content, sent_at) "
-                  "VALUES (:sender, :receiver, :content, :sent_at)");
+    query.prepare("INSERT INTO messages (sender_id, receiver_id, content, sent_at, is_file) "
+                  "VALUES (:sender, :receiver, :content, :sent_at, :is_file)");
 
     query.bindValue(":sender", senderId);
     query.bindValue(":receiver", receiverId);
     query.bindValue(":content", content);
+    query.bindValue(":is_file", false);
 
     QDateTime now = QDateTime::currentDateTimeUtc();
     query.bindValue(":sent_at", now);
@@ -195,6 +198,48 @@ QJsonObject DatabaseManager::getUserById(int userId)
     return user;
 }
 
+QJsonObject DatabaseManager::setFileMeta(int user1, int user2, const QString &fileName)
+{
+    QJsonObject result;
+    result["success"] = false;
+
+    QSqlQuery query(m_db);
+    // пустое сообщение-файл
+    if (!query.prepare("INSERT INTO messages (sender_id, receiver_id, content, is_file) "
+                       "VALUES (:sender_id, :receiver_id, '', TRUE) RETURNING id")) {
+        qWarning() << "Ошибка подготовки запроса вставки файла:" << query.lastError().text();
+        return result;
+    }
+    query.bindValue(":sender_id", user1);
+    query.bindValue(":receiver_id", user2);
+    if (!query.exec() || !query.next()) {
+        qWarning() << "Ошибка выполнения запроса вставки файла:" << query.lastError().text();
+        return result;
+    }
+
+    int messageId = query.value(0).toInt();
+    QString filePath = QString("/files/%1/%2").arg(messageId).arg(fileName);
+
+    // обновляем content с правильным путём
+    QSqlQuery updateQuery(m_db);
+    if (!updateQuery.prepare("UPDATE messages SET content = :content WHERE id = :id")) {
+        qWarning() << "Ошибка подготовки запроса обновления content:" << updateQuery.lastError().text();
+        return result;
+    }
+
+    updateQuery.bindValue(":content", filePath);
+    updateQuery.bindValue(":id", messageId);
+
+    if (!updateQuery.exec()) {
+        qWarning() << "Ошибка выполнения запроса обновления content:" << updateQuery.lastError().text();
+        return result;
+    }
+
+    result["file_path"] = filePath;
+    result["success"] = true;
+    return result;
+}
+
 QJsonObject DatabaseManager::getUserByUsername(const QString &username)
 {
     QSqlQuery query(m_db);
@@ -220,8 +265,13 @@ bool DatabaseManager::isConnected() const
 QJsonArray DatabaseManager::getUserContacts(int userId) {
     QJsonArray contacts;
     QSqlQuery query(m_db);
+
     query.prepare(
         "SELECT u.id, u.username, "
+        "(SELECT is_file FROM messages "
+        "WHERE (sender_id = :user AND receiver_id = u.id) OR "
+        "(sender_id = u.id AND receiver_id = :user) "
+        "ORDER BY sent_at DESC LIMIT 1) AS last_is_file, "
         "(SELECT content FROM messages "
         "WHERE (sender_id = :user AND receiver_id = u.id) OR "
         "(sender_id = u.id AND receiver_id = :user) "
@@ -229,7 +279,7 @@ QJsonArray DatabaseManager::getUserContacts(int userId) {
         "FROM users u "
         "JOIN contacts c ON "
         "( (u.id = c.contact_id AND c.user_id = :user) "
-        "OR (u.id = c.user_id AND c.contact_id = :user) )"
+        "OR (u.id = c.user_id AND c.contact_id = :user) ) "
         "WHERE u.id != :user "
         );
     query.bindValue(":user", userId);
@@ -239,12 +289,25 @@ QJsonArray DatabaseManager::getUserContacts(int userId) {
             QJsonObject contact;
             contact["id"] = query.value("id").toInt();
             contact["name"] = query.value("username").toString();
-            contact["last_message"] = query.value("last_message").toString();
+
+            bool lastIsFile = query.value("last_is_file").toBool();
+            QString lastMessage = query.value("last_message").toString();
+
+            if (lastIsFile) {
+                contact["last_message"] = "<b>Файл</b>";
+            } else {
+                contact["last_message"] = lastMessage;
+            }
+
             contacts.append(contact);
         }
+    } else {
+        qWarning() << "Ошибка выполнения запроса в getUserContacts:" << query.lastError().text();
     }
+
     return contacts;
 }
+
 
 bool DatabaseManager::addContact(int userId, int contactId) {
     QSqlQuery query(m_db);
@@ -258,7 +321,7 @@ QJsonArray DatabaseManager::getChatMessages(int user1, int user2, int limit) {
     QJsonArray messages;
     QSqlQuery query(m_db);
     query.prepare(
-        "SELECT content, sender_id, sent_at "
+        "SELECT id, content, sender_id, sent_at, is_file "
         "FROM messages "
         "WHERE (sender_id = :user1 AND receiver_id = :user2) OR "
         "(sender_id = :user2 AND receiver_id = :user1) "
@@ -272,12 +335,27 @@ QJsonArray DatabaseManager::getChatMessages(int user1, int user2, int limit) {
     if (query.exec()) {
         while (query.next()) {
             QJsonObject msg;
-            msg["text"] = query.value("content").toString();
+
+            bool isFile = query.value("is_file").toBool();
+            QString content = query.value("content").toString();
+
+            if (isFile) {
+                msg["type"] = "file";
+            } else {
+                msg["type"] = "text";
+            }
+
+            msg["content"] = content;
             msg["is_my"] = (query.value("sender_id").toInt() == user1);
             QDateTime dt = query.value("sent_at").toDateTime();
             msg["sent_at"] = dt.toString(Qt::ISODateWithMs);
+
             messages.append(msg);
         }
+    } else {
+        qWarning() << "Ошибка выполнения запроса в getChatMessages:" << query.lastError().text();
     }
+
     return messages;
 }
+

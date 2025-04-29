@@ -19,7 +19,9 @@ void Client::Connect(QString ip, int port)
 
 void Client::SendHttp(const QString metodeName, const QString url, const QJsonObject* json) const
 {
-    QString message = QString("%1 %2 HTTP/1.1\r\nHost: %3\r\n").arg(metodeName, url, m_ip);
+    QString urlNoSpace = url;
+    urlNoSpace = urlNoSpace.replace(' ', '_');
+    QString message = QString("%1 %2 HTTP/1.1\r\nHost: %3\r\n").arg(metodeName, urlNoSpace, m_ip);
     message.append("Connection: keep-alive\r\n");
 
     if (json && !json->isEmpty()) {
@@ -34,6 +36,26 @@ void Client::SendHttp(const QString metodeName, const QString url, const QJsonOb
         message.append("\r\n");
     }
     m_socket->write(message.toUtf8());
+}
+
+void Client::SendFile(const QString metodeName, const QString url, const QByteArray* file) const
+{
+    QString message = QString("%1 %2 HTTP/1.1\r\nHost: %3\r\n").arg(metodeName, url, m_ip);
+    message.append("Connection: keep-alive\r\n");
+
+    if (file && !file->isEmpty()) {
+        message.append("Content-Type: application/octet-stream\r\n");
+        message.append(QString("Content-Length: %1\r\n").arg(file->size()));
+        message.append("\r\n");
+        m_socket->write(message.toUtf8());
+    }
+    else {
+        message.append("\r\n");
+        m_socket->write(message.toUtf8());
+        return;
+    }
+
+    m_socket->write(*file);
 }
 
 Client::~Client()
@@ -155,6 +177,12 @@ void Client::onReadyRead()
                     emit OnUserSearchSuccess(obj);
                 else
                     emit OnUserSearchError("Пользователь не найден");
+            }
+            else if (type == "file_meta") {
+                if (obj.value("success").toBool())
+                    emit OnFileMetaReceived(obj["file_path"].toString());
+                else
+                    emit OnFileMetaError();
             }
             else {
                 emit OnErrorResponse("Неизвестный тип ответа: " + type);

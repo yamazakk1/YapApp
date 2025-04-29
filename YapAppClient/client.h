@@ -18,6 +18,7 @@ public:
 
     void Connect(QString ip, int port);
     void SendHttp(const QString metodeName, const QString url, const QJsonObject* json = nullptr) const;
+    void SendFile(const QString metodeName, const QString url, const QByteArray* file) const;
 
     QString username;
     QString token;
@@ -36,6 +37,8 @@ signals:
     void OnContactAddError(QString error);
     void OnMessageSent();
     void OnMessagesReceived(QJsonArray messages);
+    void OnFileMetaReceived(QString filePathServer);
+    void OnFileMetaError();
     void OnErrorResponse(QString message);
 private:
     QTcpSocket* m_socket;

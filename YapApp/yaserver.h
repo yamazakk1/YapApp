@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QTcpSocket>
+#include <QFileInfo>
+#include <QDir>
 #include "yahttpserver.h"
 #include "database.h"
 

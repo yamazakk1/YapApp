@@ -31,7 +31,7 @@ ChatWidget::ChatWidget(QWidget *parent)
 
 
     // ----- Никнейм сверху -----
-    currentUserLabel = new QLabel("Никнейм");
+    currentUserLabel = new QLabel("Выберите чат");
     currentUserLabel->setStyleSheet("font-weight: bold; font-size: 16px; padding: 4px;");
     currentUserLabel->setAlignment(Qt::AlignCenter);
 
@@ -54,9 +54,11 @@ ChatWidget::ChatWidget(QWidget *parent)
 
     messageInput = new QLineEdit();
     sendButton = new QPushButton("Отправить");
+    sendFileButton = new QPushButton("Отправить файл");
 
     QHBoxLayout* inputLayout = new QHBoxLayout();
     inputLayout->addWidget(messageInput);
+    inputLayout->addWidget(sendFileButton);
     inputLayout->addWidget(sendButton);
 
     QVBoxLayout* chatLayout = new QVBoxLayout();
@@ -89,6 +91,8 @@ ChatWidget::ChatWidget(QWidget *parent)
 
     connect(sendButton, &QPushButton::clicked,
             this, &ChatWidget::onSendClicked);
+    connect(sendFileButton, &QPushButton::clicked,
+            this, &ChatWidget::onSendFileClicked);
     connect(refreshButton, &QPushButton::clicked,
             this, &ChatWidget::onRefreshClicked);
     connect(searchButton, &QPushButton::clicked,
@@ -101,12 +105,16 @@ ChatWidget::ChatWidget(QWidget *parent)
             this, &ChatWidget::onContactsReceived);
     connect(&Client::getInstance(), &Client::OnMessagesReceived,
             this, &ChatWidget::onMessagesReceived);
+    connect(&Client::getInstance(), &Client::OnFileMetaReceived,
+            this, &ChatWidget::onFileMetaReceived);
+    connect(&Client::getInstance(), &Client::OnFileMetaError,
+            this, &ChatWidget::onFileMetaError);
     connect(contactList, &QListWidget::itemClicked,
             this, &ChatWidget::onContactClicked);
 
     QTimer* refreshTimer = new QTimer(this);
     connect(refreshTimer, &QTimer::timeout, this, &ChatWidget::onRefreshClicked);
-    refreshTimer->start(10000);
+    refreshTimer->start(100000);
 }
 
 void ChatWidget::showEvent(QShowEvent* event)
@@ -172,6 +180,69 @@ void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& 
 
 }
 
+void ChatWidget::addFileBubble(const QString& filePath , bool isOwn, const QTime& time)
+{
+    // Основной текст
+    QLabel* fileIcon = new QLabel();
+    QPixmap pixmap(":/images/file_icon.png");
+    if (pixmap.isNull()) {
+        qDebug() << "Не удалось загрузить картинку!";
+    }
+    fileIcon->setScaledContents(true);
+    fileIcon->setPixmap(pixmap);
+    fileIcon->setStyleSheet(
+        QString("QLabel { background-color: %1; color: black; border-radius: 10px; padding: 8px; }")
+            .arg(isOwn ? "#d1f7c4" : "#f0f0f0")
+        );
+    fileIcon->setFixedSize(60, 60);
+
+    // Время
+    QLabel* timeLabel = new QLabel(time.toString("hh:mm"));
+    timeLabel->setStyleSheet("color: gray; font-size: 10px;");
+    timeLabel->setAlignment(isOwn ? Qt::AlignRight : Qt::AlignLeft);
+
+    // Объединяем иконку и время вертикально
+    QVBoxLayout* bubbleTextLayout = new QVBoxLayout();
+    bubbleTextLayout->addWidget(fileIcon);
+    bubbleTextLayout->addWidget(timeLabel);
+
+    QWidget* bubbleInner = new QWidget();
+    bubbleInner->setLayout(bubbleTextLayout);
+
+    // Горизонтальный layout для выравнивания левого/правого
+    QHBoxLayout* bubbleLayout = new QHBoxLayout();
+    bubbleLayout->setContentsMargins(0, 0, 0, 0);
+    bubbleLayout->setSpacing(0);
+    if (isOwn) {
+        bubbleLayout->addStretch();
+        bubbleLayout->addWidget(bubbleInner);
+    } else {
+        bubbleLayout->addWidget(bubbleInner);
+        bubbleLayout->addStretch();
+    }
+
+    // Высчитывам положение скролла
+    QScrollBar* bar = chatScrollArea->verticalScrollBar();
+
+    int scrollMax = bar->maximum();
+    int scrollVal = bar->value();
+
+    double scrollRatio = scrollMax > 0 ? static_cast<double>(scrollVal) / scrollMax : 1.0;
+
+    // Добавляем виджет сообшения
+
+    QWidget* bubbleWidget = new QWidget();
+    bubbleWidget->setLayout(bubbleLayout);
+    messageLayout->insertWidget(messageLayout->count()-1, bubbleWidget);
+
+    //возвращаем прошлое относительное положение
+    QTimer::singleShot(1, [bar, scrollRatio]() {
+        int newMax = bar->maximum();
+        bar->setValue(qRound(scrollRatio * newMax));
+    });
+
+}
+
 void ChatWidget::getMessagesFromUser(const int userId)
 {
     currentUserIdChat = userId;
@@ -212,6 +283,25 @@ void ChatWidget::onSendClicked()
     }
 }
 
+void ChatWidget::onSendFileClicked()
+{
+    if(currentUserIdChat == -1 || currentSendingFilePath != "") return;
+    QString filePath = QFileDialog::getOpenFileName(this, "Выберите файл");
+    if (filePath.isEmpty()) return;
+    QFileInfo info(filePath);
+    currentSendingFilePath = filePath;
+    QJsonObject obj;
+    obj["sender_id"] = Client::getInstance().userId;
+    obj["receiver_id"] = currentUserIdChat;
+    obj["file_name"] = info.fileName().replace(' ', '_');
+    Client::getInstance().SendHttp(
+        "POST",
+        "/files",
+        &obj
+        );
+}
+
+
 void ChatWidget::onRefreshClicked()
 {
     Client::getInstance().SendHttp(
@@ -237,6 +327,8 @@ void ChatWidget::onContactsReceived(QJsonArray contacts)
         QJsonObject contact = value.toObject();
         QString name = contact["name"].toString();
         QString lastMessage = contact["last_message"].toString();
+        if(lastMessage.length() > 14+3)
+            lastMessage = lastMessage.first(14) + "...";
         addContact(contact["id"].toInt(), name, lastMessage);
     }
 }
@@ -285,15 +377,37 @@ void ChatWidget::onMessagesReceived(QJsonArray messages)
     std::reverse(sortedMessages.begin(), sortedMessages.end());
 
     for (const QJsonObject& msg : sortedMessages) {
-        QString text = msg["text"].toString();
         bool isOwn = msg["is_my"].toBool();
         QTime time = QDateTime::fromString(msg["sent_at"].toString(), Qt::ISODate)
                          .toLocalTime().time();
-
-        addMessageBubble(text, isOwn, time);
+        if(msg["type"].toString() == "text")
+        {
+            QString text = msg["content"].toString();
+            addMessageBubble(text, isOwn, time);
+        }
     }
 
     QScrollBar* scrollBar = chatScrollArea->verticalScrollBar();
     if (scrollBar)
         scrollBar->setValue(scrollBar->maximum());
+}
+
+void ChatWidget::onFileMetaReceived(QString filePathServer)
+{
+    QByteArray bytes;
+    QFile file(currentSendingFilePath);
+    if (file.open(QIODevice::ReadOnly)) {
+        bytes = file.readAll();
+        file.close();
+        Client::getInstance().SendFile("POST", filePathServer, &bytes);
+        addFileBubble(filePathServer, true, QTime::currentTime());
+    } else {
+        qWarning() << "Не удалось открыть файл для записи: " << currentSendingFilePath;
+    }
+    currentSendingFilePath = "";
+}
+
+void ChatWidget::onFileMetaError()
+{
+    currentSendingFilePath = "";
 }

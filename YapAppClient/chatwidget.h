@@ -14,6 +14,8 @@
 #include <QtMath>
 #include <QTimer>
 #include <QLabel>
+#include <QPixmap>
+#include <QFileDialog>
 #include <searchcontactwidget.h>
 
 
@@ -28,16 +30,20 @@ public:
     void setActiveUser(const QString& username);
     void addMessageBubble(const QString& text, bool isOwn, const QTime& time);
     void getMessagesFromUser(const int userId);
+    void addFileBubble(const QString& filePath , bool isOwn, const QTime& time);
 protected:
     void showEvent(QShowEvent* event) override;
 private slots:
     void onSendClicked();
+    void onSendFileClicked();
     void onRefreshClicked();
     void onSearchClicked();
     void onContactsReceived(QJsonArray contacts);
     void onContactAdded();
     void onContactClicked(QListWidgetItem* item);
     void onMessagesReceived(QJsonArray messages);
+    void onFileMetaReceived(QString filePathServer);
+    void onFileMetaError();
 private:
     QListWidget* contactList;
     QPushButton* searchButton;
@@ -51,8 +57,11 @@ private:
 
     QLineEdit* messageInput;
     QPushButton* sendButton;
+    QPushButton* sendFileButton;
     SearchContactWidget* searchWidget;
     int currentUserIdChat = -1;
+
+    QString currentSendingFilePath = "";
 };
 
 

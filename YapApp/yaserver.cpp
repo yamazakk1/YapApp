@@ -125,10 +125,91 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                 body = QJsonDocument(responseObj).toJson();
             }
         }
+        else if (request.path.startsWith("/files"))
+        {
+            if (json.isObject()) {
+                QJsonObject obj = json.object();
+                QJsonObject res = db.setFileMeta(
+                    obj["sender_id"].toInt(),
+                    obj["receiver_id"].toInt(),
+                    obj["file_name"].toString()
+                    );
+                QJsonObject responseObj;
+
+                responseObj["type"] = "file_meta";
+                responseObj["success"] = res["success"].toBool();
+                if(res["success"].toBool())
+                {
+                    responseObj["file_path"] = res["file_path"].toString();
+                }
+                body = QJsonDocument(responseObj).toJson();
+            }
+            else
+            {
+                QString baseDir = QCoreApplication::applicationDirPath();
+                QString fullPath = baseDir + request.path;
+
+                QFileInfo fileInfo(fullPath);
+                QDir dir;
+
+                // Создать все нужные папки (если их нет)
+                if (!dir.mkpath(fileInfo.path())) {
+                    qWarning() << "Не удалось создать папку:" << fileInfo.path();
+                    // Можно вернуть ошибку клиенту
+                }
+                else {
+                    QFile file(fullPath);
+                    if (file.open(QIODevice::WriteOnly))
+                    {
+                        file.write(request.body);
+                        file.close();
+
+                        qDebug() << "Файл успешно сохранён в:" << fullPath;
+                        // Можно отправить успешный ответ клиенту
+                    }
+                    else
+                    {
+                        qWarning() << "Не удалось открыть файл для записи:" << fullPath;
+                        // Можно вернуть ошибку клиенту
+                    }
+                }
+            }
+        }
     }
     else if(request.method == "GET")
     {
-        if (request.path == "/contacts") { // GET /contacts?user_id=1
+        if (request.path.startsWith("/files"))
+        {
+
+            QString baseDir = QCoreApplication::applicationDirPath();
+            QString fullPath = baseDir + request.path;
+
+            QFileInfo fileInfo(fullPath);
+            QDir dir(fileInfo.path());
+
+            if (dir.exists())
+            {
+                QFile file(fullPath);
+                if(file.open(QIODevice::ReadOnly))
+                {
+                    body = file.readAll();
+                    response.append("HTTP/1.1 200 OK\r\n");
+                    response.append("Content-Type: application/octet-stream\r\n");
+                    response.append("Content-Length: " + QByteArray::number(body.size()) + "\r\n");
+                    response.append("Connection: keep-alive\r\n\r\n");
+                    response.append(body);
+                    socket.write(response);
+                    return;
+                }
+            }
+            response.append("HTTP/1.1 404 NotFound\r\n");
+            response.append("Content-Length: 0\r\n");
+            response.append("Connection: keep-alive\r\n\r\n");
+            socket.write(response);
+            return;
+
+        }
+        else if (request.path == "/contacts") { // GET /contacts?user_id=1
             if (request.queryParams.contains("user_id"))
             {
                 QJsonArray contacts = db.getUserContacts(request.queryParams["user_id"].toInt());
