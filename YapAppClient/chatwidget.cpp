@@ -183,18 +183,20 @@ void ChatWidget::addMessageBubble(const QString& text, bool isOwn, const QTime& 
 void ChatWidget::addFileBubble(const QString& filePath , bool isOwn, const QTime& time)
 {
     // Основной текст
-    QLabel* fileIcon = new QLabel();
-    QPixmap pixmap(":/images/file_icon.png");
-    if (pixmap.isNull()) {
-        qDebug() << "Не удалось загрузить картинку!";
-    }
-    fileIcon->setScaledContents(true);
-    fileIcon->setPixmap(pixmap);
-    fileIcon->setStyleSheet(
+    QPushButton* fileButton = new QPushButton();
+    fileButton->setIcon(QIcon(":/images/file_icon.png"));
+    fileButton->setIconSize(QSize(60, 60));
+    fileButton->setStyleSheet(
         QString("QLabel { background-color: %1; color: black; border-radius: 10px; padding: 8px; }")
             .arg(isOwn ? "#d1f7c4" : "#f0f0f0")
         );
-    fileIcon->setFixedSize(60, 60);
+
+    // Обработчик нажатий
+
+    connect(fileButton, &QPushButton::clicked, this, [filePath]() {
+        Client::getInstance().OpenServerFile(filePath);
+        qDebug() << "Клик по файлу:" << filePath;
+    });
 
     // Время
     QLabel* timeLabel = new QLabel(time.toString("hh:mm"));
@@ -203,7 +205,7 @@ void ChatWidget::addFileBubble(const QString& filePath , bool isOwn, const QTime
 
     // Объединяем иконку и время вертикально
     QVBoxLayout* bubbleTextLayout = new QVBoxLayout();
-    bubbleTextLayout->addWidget(fileIcon);
+    bubbleTextLayout->addWidget(fileButton);
     bubbleTextLayout->addWidget(timeLabel);
 
     QWidget* bubbleInner = new QWidget();
@@ -384,6 +386,11 @@ void ChatWidget::onMessagesReceived(QJsonArray messages)
         {
             QString text = msg["content"].toString();
             addMessageBubble(text, isOwn, time);
+        }
+        if(msg["type"].toString() == "file")
+        {
+            QString filePath = msg["content"].toString();
+            addFileBubble(filePath, isOwn, time);
         }
     }
 

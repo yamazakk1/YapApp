@@ -196,7 +196,8 @@ void YaServer::newRequest(QTcpSocket &socket, HttpRequest &request)
                     response.append("HTTP/1.1 200 OK\r\n");
                     response.append("Content-Type: application/octet-stream\r\n");
                     response.append("Content-Length: " + QByteArray::number(body.size()) + "\r\n");
-                    response.append("Connection: keep-alive\r\n\r\n");
+                    response.append("Connection: keep-alive\r\n");
+                    response.append(QString("X-Path: %1\r\n\r\n").arg(request.path).toUtf8());
                     response.append(body);
                     socket.write(response);
                     return;

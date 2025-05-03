@@ -5,6 +5,10 @@
 #include <QObject>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QCoreApplication>
+#include <QDesktopServices>
+#include <QFileInfo>
+#include <QDir>
 
 class Client: public QObject
 {
@@ -19,7 +23,7 @@ public:
     void Connect(QString ip, int port);
     void SendHttp(const QString metodeName, const QString url, const QJsonObject* json = nullptr) const;
     void SendFile(const QString metodeName, const QString url, const QByteArray* file) const;
-
+    void OpenServerFile(const QString url);
     QString username;
     QString token;
     int userId = -1;
@@ -41,6 +45,7 @@ signals:
     void OnFileMetaError();
     void OnErrorResponse(QString message);
 private:
+    QList<QString> filesToOpen;
     QTcpSocket* m_socket;
     QString m_ip;
     int m_port;

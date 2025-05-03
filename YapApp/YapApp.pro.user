@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 16.0.0, 2025-04-29T15:22:58. -->
+<!-- Written by QtCreator 16.0.0, 2025-04-30T09:27:25. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -252,7 +252,7 @@
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_3_macos-Debug/YapApp.app/Contents/MacOS</value>
+    <value type="QString" key="RunConfiguration.WorkingDirectory.default">/Users/me/Documents/Qt/YapApp/YapApp/build/Qt_6_8_3_macos-debug/YapApp.app/Contents/MacOS</value>
    </valuemap>
    <value type="qlonglong" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

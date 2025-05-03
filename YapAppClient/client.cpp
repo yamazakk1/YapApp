@@ -58,6 +58,21 @@ void Client::SendFile(const QString metodeName, const QString url, const QByteAr
     m_socket->write(*file);
 }
 
+void Client::OpenServerFile(const QString filePath)
+{
+    QString path = filePath;
+    path = path.replace(' ', '_');
+    QString fullPath = QCoreApplication::applicationDirPath() + "/" + path;
+
+    QFileInfo fileInfo(fullPath);
+    if (fileInfo.exists() && fileInfo.isFile()) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
+    } else {
+        filesToOpen.append(path);
+        SendHttp("GET", path);
+    }
+}
+
 Client::~Client()
 {
 
@@ -132,7 +147,37 @@ void Client::onReadyRead()
 
         // Проверка, что это JSON
         if (!response.isJson()) {
-            emit OnErrorResponse("Ожидался JSON, но получен другой тип данных.");
+            QString contentType = response.header("content-type").toLower();
+            if(contentType.contains("application/octet-stream"))
+            {
+                QString path = response.header("x-path");
+                QString fullPath = QCoreApplication::applicationDirPath() + path;
+
+                QFileInfo fileInfo(fullPath);
+                QDir dir = fileInfo.absoluteDir();
+                if (!dir.exists()) {
+                    if (!dir.mkpath(".")) {
+                        qWarning() << "Не удалось создать директорию:" << dir.absolutePath();
+                        return;
+                    }
+                }
+
+                QFile file(fullPath);
+                if (file.open(QIODevice::WriteOnly)) {
+                    file.write(response.body);
+                    file.close();
+
+                    if(filesToOpen.contains(path)){
+                        QDesktopServices::openUrl(QUrl::fromLocalFile(fullPath));
+                        filesToOpen.removeOne(path);
+                    }
+                } else {
+                    qWarning() << "Не удалось сохранить файл:" << fullPath;
+                }
+
+                return;
+            }
+            emit OnErrorResponse("Неизвестный Content-Type");
             return;
         }
 
